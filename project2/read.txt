@@ -1,0 +1,1 @@
+quasi 1-d euler equations of reacting fluid
