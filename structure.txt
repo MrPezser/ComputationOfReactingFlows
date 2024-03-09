@@ -1,0 +1,22 @@
+Initialization / Prep
+-calculate area distro and area derivatives
+-calculate post/shock conditions
+-fill in pre/post shock conditions in the curves/cnostant area sections respectively
+
+Iterations
+-Loop through faces
+	-Calculate common fluxes
+
+-Loop through each element
+	-Calculate jacobian from primatives to conserved
+	-Calculate source terms (Q1D & TC)
+	-Calculate source jacobians
+	-Assemble and solver linear system on element
+
+-Apply Update
+-Calculate diagnostics / print out / asses convergence
+
+
+
+Variables
+u(ielem,ivar,idegr)	
