@@ -6,9 +6,10 @@
 #define PROJECT2_INDEXING_H
 
 #define NDEGR 1
-#define NVAR 8
+#define NSP 5
 
-#define uIJK(ielemi,jdegr,kvar)  (((ielem)*NDEGR + (jdegr))*NVAR + (kvar))
+#define uIJK(ielem,jdegr,kvar)  (((ielem)*NDEGR + (jdegr))*(NSP+3) + (kvar))
 #define aIJ(ielem,jdegr) ((ielem)*NDEGR + (jdegr))
+#define IJ(i,j,nj) ((i)*(nj) + (j))
 
 #endif //PROJECT2_INDEXING_H
