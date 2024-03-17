@@ -44,11 +44,30 @@ c     ev - interface flux vector
 c --------------------------------------------------------------------
     */
     double aL, aR, ahalf;
-    // Flux Calculation
-
     //Calculate wavespeed
     aL = wavespeed(uL, Ruv, Mw, Cv);
     ahalf = 0.5*(aL+aR);
+
+    //Calculate Pressure
+    double pL, pR;
+    pL = 0.0;
+    pR = 0.0;
+    for (int s=0; s<NSP; s++){
+        pL += uL[s]*Ruv/Mw[s];
+        pR += uR[s]*Ruv/Mw[s];
+    }
+    pL = pL * uL[NSP+1];
+    pR = pR * uR[NSP+1];
+
+    //Calculate Density
+    double rhoL, rhoR;
+    rhoL = 0.0; rhoR = 0.0;
+    for (int s=0; s<NSP; s++) {
+        rhoL += uL[s];
+        rhoR += uR[s];
+    }
+
+    // Flux Calculation
     double xml = uL[NSP]/ahalf;
     double xmr = uR[NSP]/ahalf;
 
@@ -61,29 +80,29 @@ c --------------------------------------------------------------------
     double xmml =  0.25*(xml+1.0)*(xml+1.0);
     double xmmr = -0.25*(xmr-1.0)*(xmr-1.0);
 
+    double xmhalf = sqrt(0.5*(xml*xml + xmr*xmr));
+    double xmc = 0.25*btl*btr*(xmhalf - 1.0)*(xmhalf - 1.0);
+
+    double delp = pL - pR;
+    double psum = pL + pR;
+
+    double xmcp = xmc*fmax(0.0,(1.0 - (delp/psum + 2.0*fabs(delp)/pL)));
+    double xmcm = xmc*fmax(0.0,(1.0 + (delp/psum - 2.0*fabs(delp)/pR)));
+    double cvlp = all*(1.+btl)*xml - btl*xmml;
+    double cvlm = alr*(1.+btr)*xmr - btr*xmmr;
+    double cep = cvlp - xmcp;
+    double cem = cvlm + xmcm;
+
+    double fml = area(i)*rhoL*ahalf*cep;
+    double fmr = area(i)*rhoR*ahalf*cem;
+
+    double ppl = 0.25*(xml+1.)*(xml+1.)*(2.-xml);
+    double ppr = 0.25*(xmr-1.)*(xmr-1.)*(2.+xmr);
+
 }
 
 
 /*
-
-
-
-      xmhalf = sqrt(0.5*(xml*xml + xmr*xmr))
-      xmc = 0.25*btl*btr*(xmhalf - 1.0)**2
-      delp = p(i) - p(i+1)
-      psum = p(i) + p(i+1)
-      xmcp = xmc*max(0.0,(1.0 - (delp/psum + 2.0*abs(delp)/p(i))))
-      xmcm = xmc*max(0.0,(1.0 + (delp/psum - 2.0*abs(delp)/p(i+1))))
-      cvlp = all*(1.+btl)*xml - btl*xmml
-      cvlm = alr*(1.+btr)*xmr - btr*xmmr
-      cep = cvlp - xmcp
-      cem = cvlm + xmcm
-
-      fml = area(i)*rho(i)*ahalf*cep
-      fmr = area(i)*rho(i+1)*ahalf*cem
-
-      ppl = 0.25*(xml+1.)**2*(2.-xml)
-      ppr = 0.25*(xmr-1.)**2*(2.+xmr)
 
       pnet(i) = (all*(1.+btl) - btl*ppl)*p(i)
      c        + (alr*(1.+btr) - btr*ppr)*p(i+1)
