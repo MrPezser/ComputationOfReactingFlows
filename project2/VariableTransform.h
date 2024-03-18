@@ -1,0 +1,8 @@
+//
+// Created by tskoepli on 3/18/2024.
+//
+
+#ifndef PROJECT2_VARIABLETRANSFORM_H
+#define PROJECT2_VARIABLETRANSFORM_H
+
+#endif //PROJECT2_VARIABLETRANSFORM_H

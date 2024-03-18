@@ -4,19 +4,21 @@
 
 #include <valarray>
 #include "Flux.h"
-#include "Indexing.h"
+
 
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))
 
-double wavespeed(const double* u, const double Ruv, const double* Mw, const double *Cv){
-    double rhoR, rhoCv, rho, p, a2;
+double wavespeed(const double* u, Chem& air){
+    double rhoR, rhoCv, rho, p, a2, dh;
 
     rhoR = 0.0;
     rhoCv = 0.0;
     rho = 0.0;
     for (int isp=0; isp<NSP; isp++){
-        rhoR  += u[isp]*Ruv/Mw[isp];
-        rhoCv += u[isp]*Cv[isp];
+        dh = air.Calc_dhdT(isp, u[NSP]);
+
+        rhoR  += u[isp]*air.Ruv/air.Mw[isp];
+        rhoCv += u[isp]*(dh - air.Ruv/air.Mw[isp]);
         rho   += u[isp];
     }
 
@@ -26,7 +28,7 @@ double wavespeed(const double* u, const double Ruv, const double* Mw, const doub
     return sqrt(a2);
 }
 
-void LDFSS(const double Ruv, const double A, const double* Mw, const double* Cv, const double* uL, const double* uR, double* flux) {
+void LDFSS(const double A, const double* uL, const double* uR, Chem &air, double* flux) {
     /*
 c --------------------------------------------------------------------
 c ----- inviscid flux contribution (LDFSS)
@@ -43,12 +45,12 @@ c     res  - residual vector
 c     ev - interface flux vector
 c --------------------------------------------------------------------
     */
-
     ///MOVE CELL SPECIFIC CALCULATIONS (PRESSURE, DENSITY, ENTHALPY,....) OUTSIDE OF FLUX LOOP
 
     //Calculate wavespeed
     double aL, aR, ahalf;
-    aL = wavespeed(uL, Ruv, Mw, Cv);
+    aL = wavespeed(uL, air);
+    aR = wavespeed(uR, air);
     ahalf = 0.5*(aL+aR);
 
     //Calculate Pressure
@@ -56,8 +58,8 @@ c --------------------------------------------------------------------
     pL = 0.0;
     pR = 0.0;
     for (int s=0; s<NSP; s++){
-        pL += uL[s]*Ruv/Mw[s];
-        pR += uR[s]*Ruv/Mw[s];
+        pL += uL[s]*air.Ruv/air.Mw[s];
+        pR += uR[s]*air.Ruv/air.Mw[s];
     }
     pL = pL * uL[NSP+1];
     pR = pR * uR[NSP+1];
@@ -72,8 +74,8 @@ c --------------------------------------------------------------------
 
     //Calculate Total Enthaply
     double hoL, hoR;
-    //CalcEnthalpy(Ruv, Mw, uL, hoL);
-    //CalcEnthalpy(Ruv, Mw, uR, hoR);
+    hoL = air.Calc_h_Mix(uL) + pL + 0.5*uL[NSP]*uL[NSP]*rhoL;
+    hoR = air.Calc_h_Mix(uR) + pR + 0.5*uR[NSP]*uR[NSP]*rhoR;
 
     // Flux Calculation
     double xml = uL[NSP]/ahalf;
@@ -115,20 +117,46 @@ c --------------------------------------------------------------------
     }
     flux[NSP] = fml*uL[NSP]  + fmr*uR[NSP] + A*pnet;    //momentum
     flux[NSP+1] = fml*hoL + fmr*hoR;                    //total energy
+    flux[NSP+2] = 0.0;                                  //vibrational energy
 }
 
+void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u,double* Acc,double* Afa,double* dAdx, double* res) {
+    //Find the common flux at each face
+    double flux_comm[(nelem+1)*(NSP+3)];
+    double *uL, *uR, *flux;
 
-/*
+    //Interior faces
+    for (int iface=1; iface<nelem; iface++) {
+        uL = &(u[uIJK(iface - 1, 0, 0)]);
+        uR = &(u[uIJK(iface, 0, 0)]);
+        flux = &flux_comm[fIJ(iface, 0)];
 
-c ---- Residual calculation
+        LDFSS(Afa[iface], uL, uR, air, flux);
+    }
+    //Boundary faces - just extrapolate both for now I guess - need to do this better
+    uL = &(u[uIJK(0, 0, 0)]);
+    uR = &(u[uIJK(0, 0, 0)]);
+    flux = &flux_comm[fIJ(0, 0)];
+    LDFSS(Afa[0], uL, uR, air, flux);
 
-      do i=2,imx
-       res(i,1:nsp+2) = (ev(i,1:nsp+2)-ev(i-1,1:nsp+2))/dx(i)
-      enddo
+    uL = &(u[uIJK(nelem - 1, 0, 0)]);
+    uR = uL;
+    flux = &flux_comm[fIJ(nelem, 0)];
+    LDFSS(Afa[nelem], uL, uR, air, flux);
 
-c ---- add pressure source term
 
-      do i=2,imx
-       res(i,nsp+1) = res(i,nsp+1) - p(i)*(area(i)-area(i-1))/dx(i)
-      enddo
- */
+    //Calculate RHS residual from flux scheme and pressure source term
+    for (int ielem=0; ielem<nelem; ielem++) {
+        for (int kvar=0; kvar<NSP+3; kvar++){
+            res[fIJ(ielem, kvar)] = (flux[fIJ(ielem+1,kvar)] - flux[fIJ(ielem,kvar)]) / dx;
+        }
+
+        //Pressure source term
+        double p;
+        p = 0.0;
+        for (int s=0; s<NSP; s++){
+            p += u[uIJK(ielem,0,s)]*air.Ruv/air.Mw[s];
+        }
+        res[fIJ(ielem, NSP)] -= p*(Afa[ielem+1] - Afa[ielem])/dx;
+    }
+}

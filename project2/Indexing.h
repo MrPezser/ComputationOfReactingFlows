@@ -10,6 +10,7 @@
 
 #define uIJK(ielem,jdegr,kvar)  (((ielem)*NDEGR + (jdegr))*(NSP+3) + (kvar))
 #define aIJ(ielem,jdegr) ((ielem)*NDEGR + (jdegr))
+#define fIJ(ielem,kvar)  ((ielem)*(NSP+3) + (kvar))
 #define IJ(i,j,nj) ((i)*(nj) + (j))
 
 #endif //PROJECT2_INDEXING_H

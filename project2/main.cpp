@@ -17,11 +17,6 @@ double area_slope(const double x){
 }
 
 int main() {
-
-    LoadCurveFits();
-
-}
-/*
     //Inputs
     int nelem;
     nelem = 200;
@@ -102,12 +97,10 @@ int main() {
         }
     }
 
-    solve_nonreacting();
+    //solve_nonreacting();
 
 
 
 
     return 0;
 }
-
- */
