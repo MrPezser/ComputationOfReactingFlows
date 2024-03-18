@@ -21,7 +21,7 @@ void solve_nonreacting(int nelem, int nsp, double dx,double CFL,double* u,double
             uR = &(u[uIJK(iface,0,0)]);
             flx = &flux_comm[aIJ(iface,0)];
 
-            LDFSS(uL, uR, flx);
+            //LDFSS(uL, uR, flx);
         }
 
         //Calculate residual RHS and diagonal element sof implicit operator

@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/project2.dir/Chemistry.cpp.obj"
+  "CMakeFiles/project2.dir/Chemistry.cpp.obj.d"
   "CMakeFiles/project2.dir/Flux.cpp.obj"
   "CMakeFiles/project2.dir/Flux.cpp.obj.d"
   "CMakeFiles/project2.dir/Solver_main.cpp.obj"

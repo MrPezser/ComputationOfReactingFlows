@@ -80,6 +80,12 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Chemistry.cpp">
+			<Option target="project2"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Chemistry.h">
+			<Option target="project2"/>
+		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Flux.cpp">
 			<Option target="project2"/>
 		</Unit>

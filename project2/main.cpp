@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include "Indexing.h"
+#include "Chemistry.h"
 
 double surf_height(const double x){
     return fmin(2.0, 1 + 4*(x-0.5)*(x-0.5));
@@ -16,6 +17,11 @@ double area_slope(const double x){
 }
 
 int main() {
+
+    LoadCurveFits();
+
+}
+/*
     //Inputs
     int nelem;
     nelem = 200;
@@ -103,3 +109,5 @@ int main() {
 
     return 0;
 }
+
+ */

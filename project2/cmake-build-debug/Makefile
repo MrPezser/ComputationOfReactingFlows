@@ -128,6 +128,30 @@ project2/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/build
 .PHONY : project2/fast
 
+Chemistry.obj: Chemistry.cpp.obj
+.PHONY : Chemistry.obj
+
+# target to build an object file
+Chemistry.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Chemistry.cpp.obj
+.PHONY : Chemistry.cpp.obj
+
+Chemistry.i: Chemistry.cpp.i
+.PHONY : Chemistry.i
+
+# target to preprocess a source file
+Chemistry.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Chemistry.cpp.i
+.PHONY : Chemistry.cpp.i
+
+Chemistry.s: Chemistry.cpp.s
+.PHONY : Chemistry.s
+
+# target to generate assembly for a file
+Chemistry.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Chemistry.cpp.s
+.PHONY : Chemistry.cpp.s
+
 Flux.obj: Flux.cpp.obj
 .PHONY : Flux.obj
 
@@ -209,6 +233,9 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... project2
+	@echo ... Chemistry.obj
+	@echo ... Chemistry.i
+	@echo ... Chemistry.s
 	@echo ... Flux.obj
 	@echo ... Flux.i
 	@echo ... Flux.s

@@ -26,7 +26,7 @@ double wavespeed(const double* u, const double Ruv, const double* Mw, const doub
     return sqrt(a2);
 }
 
-void LDFSS(const double Ruv, const double* Mw, const double* Cv, const double* uL, const double* uR, double* flux) {
+void LDFSS(const double Ruv, const double A, const double* Mw, const double* Cv, const double* uL, const double* uR, double* flux) {
     /*
 c --------------------------------------------------------------------
 c ----- inviscid flux contribution (LDFSS)
@@ -43,8 +43,11 @@ c     res  - residual vector
 c     ev - interface flux vector
 c --------------------------------------------------------------------
     */
-    double aL, aR, ahalf;
+
+    ///MOVE CELL SPECIFIC CALCULATIONS (PRESSURE, DENSITY, ENTHALPY,....) OUTSIDE OF FLUX LOOP
+
     //Calculate wavespeed
+    double aL, aR, ahalf;
     aL = wavespeed(uL, Ruv, Mw, Cv);
     ahalf = 0.5*(aL+aR);
 
@@ -66,6 +69,11 @@ c --------------------------------------------------------------------
         rhoL += uL[s];
         rhoR += uR[s];
     }
+
+    //Calculate Total Enthaply
+    double hoL, hoR;
+    //CalcEnthalpy(Ruv, Mw, uL, hoL);
+    //CalcEnthalpy(Ruv, Mw, uR, hoR);
 
     // Flux Calculation
     double xml = uL[NSP]/ahalf;
@@ -93,25 +101,24 @@ c --------------------------------------------------------------------
     double cep = cvlp - xmcp;
     double cem = cvlm + xmcm;
 
-    double fml = area(i)*rhoL*ahalf*cep;
-    double fmr = area(i)*rhoR*ahalf*cem;
+    double fml = A*rhoL*ahalf*cep;
+    double fmr = A*rhoR*ahalf*cem;
 
     double ppl = 0.25*(xml+1.)*(xml+1.)*(2.-xml);
     double ppr = 0.25*(xmr-1.)*(xmr-1.)*(2.+xmr);
 
+    double pnet = (all*(1.+btl) - btl*ppl)*pL
+            + (alr*(1.+btr) - btr*ppr)*pR;
+
+    for (int isp=0; isp<NSP; isp++) {
+        flux[isp] = fml * uL[isp] +fmr * uR[isp];       //species  density
+    }
+    flux[NSP] = fml*uL[NSP]  + fmr*uR[NSP] + A*pnet;    //momentum
+    flux[NSP+1] = fml*hoL + fmr*hoR;                    //total energy
 }
 
 
 /*
-
-      pnet(i) = (all*(1.+btl) - btl*ppl)*p(i)
-     c        + (alr*(1.+btr) - btr*ppr)*p(i+1)
-
-      ev(i,1:nsp) = fml*ys(i,1:nsp) + fmr*ys(i+1,1:nsp)           !species density
-      ev(i,nsp+1) = fml*u(i)  + fmr*u(i+1) + area(i)*pnet(i)      !momentum
-      ev(i,nsp+2) = fml*ho(i) + fmr*ho(i+1)                       !total energy
-
-      enddo
 
 c ---- Residual calculation
 
