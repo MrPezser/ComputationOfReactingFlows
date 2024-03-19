@@ -9,16 +9,16 @@
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))
 
 double wavespeed(const double* u, Chem& air){
-    double rhoR, rhoCv, rho, p, a2, dh;
+    double rhoR, rhoCv, rho, p, a2, cp;
 
     rhoR = 0.0;
     rhoCv = 0.0;
     rho = 0.0;
     for (int isp=0; isp<NSP; isp++){
-        dh = air.Calc_dhdT(isp, u[NSP]);
+        cp = air.Calc_cp_curve(isp, u[NSP]);
 
         rhoR  += u[isp]*air.Ruv/air.Mw[isp];
-        rhoCv += u[isp]*(dh - air.Ruv/air.Mw[isp]);
+        rhoCv += u[isp]*(cp - air.Ruv/air.Mw[isp]);
         rho   += u[isp];
     }
 

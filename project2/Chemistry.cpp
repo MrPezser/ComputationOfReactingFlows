@@ -32,22 +32,22 @@ void Chem::Calc_h_Curve(int isp, double T, double* hs) {
     T5 = pow(T,5);
 
     if (T > 1000) {
-        hs[isp] = (Ruv/Mw[isp])*(Ah[isp]*T + Bh[isp]*T2 + Ch[isp]*T3 + Dh[isp]*T4 + Eh[isp]*T5 + Fh[isp]);
+        hs[isp] = (Ruv/Mw[isp])*(Ah[isp]*T + Bh[isp]*T2/2.0 + Ch[isp]*T3/3.0 + Dh[isp]*T4/4.0 + Eh[isp]*T5/5.0 + Fh[isp]);
     } else {  //T<1000
-        hs[isp] = (Ruv/Mw[isp])*(Al[isp]*T + Bl[isp]*T2 + Cl[isp]*T3 + Dl[isp]*T4 + El[isp]*T5 + Fl[isp]);
+        hs[isp] = (Ruv/Mw[isp])*(Al[isp]*T + Bl[isp]*T2/2.0 + Cl[isp]*T3/3.0 + Dl[isp]*T4/4.0 + El[isp]*T5/5.0 + Fl[isp]);
     }
 }
 
-double Chem::Calc_dhdT(int isp, double T) {
+double Chem::Calc_cp_curve(int isp, double T) {
     double T2,T3,T4,T5;
     T2 = T*T;
     T3 = pow(T,3);
     T4 = pow(T,4);
 
     if (T >= 1000) {
-        return (Ruv/Mw[isp])*(Ah[isp] + Bh[isp]*T*2 + Ch[isp]*T2*3 + Dh[isp]*T3*4 + Eh[isp]*T4*5);
+        return (Ruv/Mw[isp])*(Ah[isp] + Bh[isp]*T + Ch[isp]*T2 + Dh[isp]*T3 + Eh[isp]*T4);
     } else {  //T<1000
-        return (Ruv/Mw[isp])*(Al[isp] + Bl[isp]*T*2 + Cl[isp]*T2*3 + Dl[isp]*T3*4 + El[isp]*T4*5);
+        return (Ruv/Mw[isp])*(Al[isp] + Bl[isp]*T + Cl[isp]*T2 + Dl[isp]*T3 + El[isp]*T4);
     }
 }
 
