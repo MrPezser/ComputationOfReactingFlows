@@ -51,15 +51,15 @@ double Chem::Calc_cp_curve(int isp, double T) {
     }
 }
 
-double Chem::Calc_h_Mix(const double* unk) {
+double Chem::Calc_rho_h_Mix(const double* unk) {
     //calculate the mixture enthalpy
-    double hs, T, rho_h;
+    double hs[NSP], T, rho_h;
     T = unk[NSP+1];
     rho_h = 0.0;
 
     for (int isp=0; isp<NSP; isp++) {
-        Calc_h_Curve(isp, T, &hs);
-        rho_h += unk[isp]*hs;
+        Calc_h_Curve(isp, T, hs);
+        rho_h += unk[isp]*hs[isp];
     }
 
     return rho_h;

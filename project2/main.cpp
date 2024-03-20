@@ -3,6 +3,7 @@
 
 #include "Indexing.h"
 #include "Chemistry.h"
+#include "Solver_main.h"
 
 double surf_height(const double x){
     return fmin(2.0, 1 + 4*(x-0.5)*(x-0.5));
@@ -12,21 +13,24 @@ double area_slope(const double x){
     if (x > 1.0){
         return 0.0;
     } else {
-        return 8*(x-0.5);
+        return (2*M_PI*surf_height(x))*8*(x-0.5);
     }
 }
 
 int main() {
     //Inputs
     int nelem;
+    double CFL;
+
     nelem = 200;
+    CFL = 0.5;
 
     ///MAKE SURE THAT THERE IS CONSISTENCE AMONG THE INDEXING FOR DIFFEREENT FACE-VALUED VARIABLES/ARRAYS
 
     double vel0, rho0, T0, pb, YN20, YNO0, YO0, YN0, YO20;
     //Initial state as given
-    vel0 = 3500.0;
-    rho0 = 0.0003074;
+    vel0 = 2000;//3500.0;
+    rho0 = 2.34e-4;//0.0003074;
     T0 = 350;
     YN20 = 0.7643;
     YNO0 = 0.0;
@@ -62,14 +66,14 @@ int main() {
 
     //Find initial flow variables
     double u0[8], u0back[8];
-    u0[0] = YO0;
-    u0[1] = YN0;
-    u0[2] = YO20;
-    u0[3] = YN20;
-    u0[4] = YNO0;
-    u0[5] = 3500.0; //u_freestream
-    u0[6] = 350.0;  //trns-rot temperature
-    u0[6] = 350.0;  //vib temperautre
+    u0[0] = YN20*rho0;
+    u0[1] = YO20*rho0;
+    u0[2] = YNO0*rho0;
+    u0[3] = YN0*rho0;
+    u0[4] = YO0*rho0;
+    u0[5] = vel0; //u_freestream
+    u0[6] = T0;  //trns-rot temperature
+    u0[7] = T0;  //vib temperautre
 
     //Calculate post shock conditions (approx Mach 9.33333 normal shock)
     u0back[0] = u0[0];
@@ -77,15 +81,15 @@ int main() {
     u0back[2] = u0[2];
     u0back[3] = u0[3];
     u0back[4] = u0[4];
-    u0back[5] = 616.808;
-    u0back[6] = 6258.0;
-    u0back[7] = 6258.0;
+    u0back[5] = u0[5];//616.808;
+    u0back[6] = u0[6];//6258.0;
+    u0back[7] = u0[7];//6258.0;
 
     //Intialize flow
     auto u = (double*)malloc(nelem*NDEGR*(NSP+3)*sizeof(double));
     for(int ielem=0; ielem<nelem; ielem++) {
         for (int jdegr=0; jdegr<NDEGR; jdegr++){
-            for (int kvar=0; kvar<(NSP+2); kvar++){
+            for (int kvar=0; kvar<(NSP+3); kvar++){
 
                 if (xfa[ielem]<1.0) {   //Freestream conditions
                     u[uIJK(ielem, jdegr, kvar)] = u0[kvar];
@@ -97,9 +101,18 @@ int main() {
         }
     }
 
-    //solve_nonreacting();
+    Chem air = Chem();
 
+    solve_nonreacting(nelem, dx, CFL, air, u0, u, Acc, Afa, dAdx);
 
+    //print soln
+    FILE* fout = fopen("waveout.tec", "w");
+    fprintf(fout, "x\trhoN2\trhoO2\trhoNO\trhoN\trhoO\tu\tT\tTv\n");
+
+    for (int i=0; i<nelem; i++) {
+            fprintf(fout,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",xcc[i],
+                   u[uIJK(i,0,0)], u[uIJK(i,0,1)], u[uIJK(i,0,2)], u[uIJK(i,0,3)], u[uIJK(i,0,4)], u[uIJK(i,0,5)], u[uIJK(i,0,6)], u[uIJK(i,0,7)]);
+    }
 
 
     return 0;

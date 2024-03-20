@@ -3,7 +3,6 @@
 //
 
 #include "VariableTransform.h"
-#include "Indexing.h"
 
 void BuildDudv(double* unk, Chem &air, double** D) {
     //bluid the matrix transformation/ jacobian for d(conserv) / d(primative)
@@ -34,28 +33,30 @@ void BuildDudv(double* unk, Chem &air, double** D) {
     D[NSP][NSP+2] = 0.0;
 
     //total energy derivatives
-    double rhoCv, rhoCp, e, rhoR, cp, h;
+    double rhoCv, rhoCp, e[NSP]{}, rhoR, cp, h[NSP];
     rhoCv = 0.0;
     rhoCp = 0.0;
     rhoR = 0.0;
-    e = 0.0;
     for (int isp=0; isp<NSP; isp++){
         cp = air.Calc_cp_curve(isp, unk[NSP]);
-        air.Calc_h_Curve(isp, unk[NSP+1], &h);
+        air.Calc_h_Curve(isp, unk[NSP+1], h);
 
         rhoR  += unk[isp]*air.Ruv/air.Mw[isp];
         rhoCv += unk[isp]*(cp - air.Ruv/air.Mw[isp]);
         rhoCp += unk[isp]*(cp);
-        e += h - (air.Ruv/air.Mw[isp]);
+        e[isp] = h[isp] - (air.Ruv/air.Mw[isp])*unk[NSP+1];
     }
 
     for (int isp=0; isp<NSP; isp++){
-        D[NSP+1][isp] = e - (rhoCv/rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1] + 0.5*unk[NSP]*unk[NSP];
+        D[NSP+1][isp] = e[isp] + 0.5*unk[NSP]*unk[NSP]; //- (rhoCv/rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1]
     }
-    D[NSP+1][NSP]   = rho_mix*unk[NSP];
-    D[NSP+1][NSP+1] = rhoCp - rho_mix*0.5*unk[NSP]*unk[NSP]/unk[NSP+1];
+    D[NSP+1][NSP]   = unk[NSP]*rho_mix;
+    D[NSP+1][NSP+1] = rhoCv - rho_mix*0.5*unk[NSP]*unk[NSP]/unk[NSP+1];
     D[NSP+1][NSP+2] = 0.0; //leave 0 for now
+
+
     //vibrational energy derivatives
-    //leave 0 for now
+    //leave out for now
+    D[NSP+2][NSP+2] = 1.0;
 
 }

@@ -79,6 +79,12 @@ build CMakeFiles/project2.dir/VariableTransform.cpp.obj: CXX_COMPILER__project2_
   OBJECT_DIR = CMakeFiles\project2.dir
   OBJECT_FILE_DIR = CMakeFiles\project2.dir
 
+build CMakeFiles/project2.dir/LinearSolve.cpp.obj: CXX_COMPILER__project2_Debug C$:/Users/tskoepli/Documents/GitHub/ComputationOfReactingFlows/project2/LinearSolve.cpp || cmake_object_order_depends_target_project2
+  DEP_FILE = CMakeFiles\project2.dir\LinearSolve.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\project2.dir
+  OBJECT_FILE_DIR = CMakeFiles\project2.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target project2
@@ -87,7 +93,7 @@ build CMakeFiles/project2.dir/VariableTransform.cpp.obj: CXX_COMPILER__project2_
 #############################################
 # Link the executable project2.exe
 
-build project2.exe: CXX_EXECUTABLE_LINKER__project2_Debug CMakeFiles/project2.dir/main.cpp.obj CMakeFiles/project2.dir/Flux.cpp.obj CMakeFiles/project2.dir/Solver_main.cpp.obj CMakeFiles/project2.dir/Chemistry.cpp.obj CMakeFiles/project2.dir/VariableTransform.cpp.obj
+build project2.exe: CXX_EXECUTABLE_LINKER__project2_Debug CMakeFiles/project2.dir/main.cpp.obj CMakeFiles/project2.dir/Flux.cpp.obj CMakeFiles/project2.dir/Solver_main.cpp.obj CMakeFiles/project2.dir/Chemistry.cpp.obj CMakeFiles/project2.dir/VariableTransform.cpp.obj CMakeFiles/project2.dir/LinearSolve.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\project2.dir

@@ -74,8 +74,8 @@ c --------------------------------------------------------------------
 
     //Calculate Total Enthaply
     double hoL, hoR;
-    hoL = air.Calc_h_Mix(uL) + pL + 0.5*uL[NSP]*uL[NSP]*rhoL;
-    hoR = air.Calc_h_Mix(uR) + pR + 0.5*uR[NSP]*uR[NSP]*rhoR;
+    hoL = air.Calc_rho_h_Mix(uL) + 0.5*uL[NSP]*uL[NSP]*rhoL;
+    hoR = air.Calc_rho_h_Mix(uR) + 0.5*uR[NSP]*uR[NSP]*rhoR;
 
     // Flux Calculation
     double xml = uL[NSP]/ahalf;
@@ -96,34 +96,119 @@ c --------------------------------------------------------------------
     double delp = pL - pR;
     double psum = pL + pR;
 
-    double xmcp = xmc*fmax(0.0,(1.0 - (delp/psum + 2.0*fabs(delp)/pL)));
-    double xmcm = xmc*fmax(0.0,(1.0 + (delp/psum - 2.0*fabs(delp)/pR)));
-    double cvlp = all*(1.+btl)*xml - btl*xmml;
-    double cvlm = alr*(1.+btr)*xmr - btr*xmmr;
+    double xmcp = xmc * fmax(0.0,(1.0 - (delp/psum + 2.0*fabs(delp)/pL)));
+    double xmcm = xmc * fmax(0.0,(1.0 + (delp/psum - 2.0*fabs(delp)/pR)));
+    double cvlp = all*(1.0+btl)*xml - btl*xmml;
+    double cvlm = alr*(1.0+btr)*xmr - btr*xmmr;
     double cep = cvlp - xmcp;
     double cem = cvlm + xmcm;
 
     double fml = A*rhoL*ahalf*cep;
     double fmr = A*rhoR*ahalf*cem;
 
-    double ppl = 0.25*(xml+1.)*(xml+1.)*(2.-xml);
-    double ppr = 0.25*(xmr-1.)*(xmr-1.)*(2.+xmr);
+    double ppl = 0.25*(xml+1.0)*(xml+1.0)*(2.0-xml);
+    double ppr = 0.25*(xmr-1.0)*(xmr-1.0)*(2.0+xmr);
 
-    double pnet = (all*(1.+btl) - btl*ppl)*pL
-            + (alr*(1.+btr) - btr*ppr)*pR;
+    double pnet = (all*(1.0+btl) - btl*ppl)*pL
+                + (alr*(1.0+btr) - btr*ppr)*pR;
 
     for (int isp=0; isp<NSP; isp++) {
-        flux[isp] = fml * uL[isp] +fmr * uR[isp];       //species  density
+        flux[isp] = fml*uL[isp] + fmr*uR[isp];       //species  density
     }
     flux[NSP] = fml*uL[NSP]  + fmr*uR[NSP] + A*pnet;    //momentum
     flux[NSP+1] = fml*hoL + fmr*hoR;                    //total energy
     flux[NSP+2] = 0.0;                                  //vibrational energy
 }
 
-void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u,double* Acc,double* Afa,double* dAdx, double* res) {
+void EulerFlux(double gam, const double *u, double* flux){
+    //Convert to multispecies
+    flux[0] = 0.0;
+    flux[1] = 0.0;
+    flux[2] = 0.0;
+
+    flux[0] = u[1];
+    flux[1] = (u[1]*v) + p;
+    flux[2] = v * (u[2] + p);
+
+}
+
+double F1pm(const int isPlus, const double M, const double rho, const double c){
+    //Convert to multispecies
+    if (isPlus==1){
+        if (M<=-1.0) {
+            //F1+
+            return 0.0;
+        }
+        if (M>=1.0) {
+            return rho * M * c;
+        }
+        return 0.25*rho*c*(M+1)*(M+1);
+    }
+
+    if (isPlus==0) {
+        if (M <= -1.0) {
+            //F1-
+            return rho * M * c;// *-1
+        }
+        if (M >= 1.0) {
+            return 0.0;
+        }
+        return -0.25 * rho * c * (M - 1) * (M - 1);
+    }
+
+    return NAN;
+}
+
+void LeerFlux(double gam, const double* uL, const double* uR, double *flux){
+    //Convert to multispecies
+    double F1L, F1R, fPlus[3], fMins[3];
+
+    flux[0] = 0.0;
+    flux[1] = 0.0;
+    flux[2] = 0.0;
+
+
+    if (ML >= 1.0){
+        EulerFlux(gam, uL, flux);
+        return;
+    }
+
+    if (MR <= -1.0){
+        EulerFlux(gam, uR, flux);
+        return;
+    }
+
+    F1L = F1pm(1, ML, rhoL, cL);
+    F1R = F1pm(0, MR, rhoR, cR);
+
+    if(isnan(F1L+F1R)){
+        throw overflow_error("getting NAN mass flux!");
+    }
+
+    fPlus[0] = F1L;
+    double A = ((gam - 1) * vL) + (2.0 * cL); //vL
+    fPlus[1] = F1L * A / gam;
+    fPlus[2] = F1L * A*A * 0.5 / (gam*gam - 1.0);
+
+
+    fMins[0] = F1R;
+    A = -((gam - 1) * vL) - (2.0 * cR); //vR
+    fMins[1] = F1R * A / gam;
+    fMins[2] = F1R * A*A * 0.5 / (gam*gam - 1.0);
+
+    flux[0] = fPlus[0] + fMins[0];
+    flux[1] = fPlus[1] + fMins[1];
+    flux[2] = fPlus[2] + fMins[2];
+}
+
+void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,double* Acc,double* Afa,double* dAdx, double* res) {
     //Find the common flux at each face
     double flux_comm[(nelem+1)*(NSP+3)];
     double *uL, *uR, *flux;
+
+    for (int iu=0; iu<nelem*(NSP+3)*NDEGR; iu++) {
+        res[iu] = 0.0;
+    }
 
     //Interior faces
     for (int iface=1; iface<nelem; iface++) {
@@ -133,30 +218,30 @@ void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u,double* Acc,d
 
         LDFSS(Afa[iface], uL, uR, air, flux);
     }
-    //Boundary faces - just extrapolate both for now I guess - need to do this better
-    uL = &(u[uIJK(0, 0, 0)]);
+    //Boundary faces - just extrapolate RHS for now - need to do pressure BC
+    uL = u0;
     uR = &(u[uIJK(0, 0, 0)]);
     flux = &flux_comm[fIJ(0, 0)];
     LDFSS(Afa[0], uL, uR, air, flux);
 
     uL = &(u[uIJK(nelem - 1, 0, 0)]);
-    uR = uL;
+    uR = &(u[uIJK(nelem - 1, 0, 0)]);
     flux = &flux_comm[fIJ(nelem, 0)];
     LDFSS(Afa[nelem], uL, uR, air, flux);
 
 
     //Calculate RHS residual from flux scheme and pressure source term
     for (int ielem=0; ielem<nelem; ielem++) {
-        for (int kvar=0; kvar<NSP+3; kvar++){
-            res[fIJ(ielem, kvar)] = (flux[fIJ(ielem+1,kvar)] - flux[fIJ(ielem,kvar)]) / dx;
+        for (int kvar=0; kvar<(NSP+3); kvar++){
+            res[fIJ(ielem, kvar)] = -(flux_comm[fIJ(ielem+1,kvar)] - flux_comm[fIJ(ielem,kvar)]) / dx;
         }
 
         //Pressure source term
         double p;
         p = 0.0;
         for (int s=0; s<NSP; s++){
-            p += u[uIJK(ielem,0,s)]*air.Ruv/air.Mw[s];
+            p += u[uIJK(ielem,0,s)] * (air.Ruv/air.Mw[s]) * u[uIJK(ielem,0,NSP+1)];
         }
-        res[fIJ(ielem, NSP)] -= p*(Afa[ielem+1] - Afa[ielem])/dx;
+        res[fIJ(ielem, NSP)] += p*dAdx[ielem];
     }
 }

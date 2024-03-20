@@ -6,6 +6,7 @@
 #define PROJECT2_VARIABLETRANSFORM_H
 
 #include "Chemistry.h"
+#include "Indexing.h"
 
 void BuildDudv(double* unk, Chem &air, double** D);
 

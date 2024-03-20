@@ -25,7 +25,7 @@ public:
         LoadCurveFits();
     }
     void Calc_h_Curve(int isp, double T, double* hs);
-    double Calc_h_Mix(const double* unk);
+    double Calc_rho_h_Mix(const double* unk);
     double Calc_cp_curve(int isp, double T);
 };
 

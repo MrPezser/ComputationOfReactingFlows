@@ -6,28 +6,89 @@
 #include "Indexing.h"
 #include "Flux.h"
 #include "VariableTransform.h"
+#include "LinearSolve.h"
 
+void IterUpdate(int iter, int nelem, const double* res){
+    printf("Iter:%5d\t",iter);
 
-void solve_nonreacting(int nelem, double dx,double CFL, Chem &air, double* u,double* Acc,double* Afa,double* dAdx) {
+    double ressum[NSP+3]{0.0};
+
+    for (int ie=0; ie<nelem; ie++){
+        for (int iv=0; iv<NSP+3; iv++) {
+            ressum[iv] += (res[fIJ(ie,iv)])*(res[fIJ(ie,iv)]);
+        }
+    }
+    for (int iv=0; iv<NSP+3; iv++) { // NOLINT(modernize-loop-convert)
+        ressum[iv] = sqrt(ressum[iv]);
+    }
+    printf("Res:%6.2e %6.2e %6.2e %6.2e %6.2e %6.2e %6.2e %6.2e ",
+           ressum[0],ressum[1],ressum[2],ressum[3],ressum[4],ressum[5],ressum[6],ressum[7]);
+
+    printf("\n");
+}
+
+void solve_nonreacting(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,double* Acc,double* Afa,double* dAdx) {
     //Solve the nonreacting / chemically frozen problem
-    double res[(nelem)*(NSP+3)];
+
+    //Create some arrays
+    double res[(nelem)*(NSP+3)*NDEGR];
+    double dv[(nelem)*(NSP+3)*NDEGR];
+    auto D = (double**)malloc((NSP+3) * sizeof(double*)); //Same memory to be used for each local matrix (chg this if making parallel)
+    for (int isp = 0; isp < NSP+3; isp++)
+        D[isp] = (double*)malloc( (NSP+3) * sizeof(double));
+
 
     for (int iter=0; iter<MXITER; iter++){
+        int flg{};
         //Loop through elements and conduct local timestepping
 
-        //Calculate residual
-        CalcRes(nelem, dx,CFL, air, u,Acc,Afa,dAdx, res);
+        //========== Calculate residual
+        CalcRes(nelem, dx,CFL, air, u0, u,Acc,Afa,dAdx, res);
 
-        // Solve linear system on each element
-        auto D = (double**)malloc((NSP+3) * sizeof(double*));
-        for (int isp = 0; isp < NSP+3; isp++)
-            D[isp] = (double*)malloc( (NSP+3) * sizeof(double));s
-
+        //========== Solve linear system on each element
         for (int ielem=0; ielem<nelem; ielem++) {
             double* unk = &(u[uIJK(ielem,0,0)]);
+            double tol = 1e-8;
+            int P[NSP+3]{}; //permutation vector for pivoting
+            int N = NSP+3;
+
+            //Evaluate the cons-prim jacobian
             BuildDudv(unk, air, D);
+            for (int i=0; i<NSP+3; i++) {
+                for (int j=0; j<NSP+3; j++) {
+                    D[i][j] *= Acc[ielem];
+                }
+            }
+
+            //get the rhs block needed
+            double* b = &(res[uIJK(ielem,0,0)]);
+            double* x = &(dv[uIJK(ielem,0,0)]);
+
+            flg = LUPDecompose(D, N, tol, P);
+            if (flg == 0){printf("LU Decomp Fail\n");break;}
+
+            LUPSolve(D, P, b, N, x);
+        }
+        if (flg == 0){break;}
+
+
+        //Carry out Euler Timestep
+        for (int ielem=0; ielem<nelem; ielem++){
+            double* ui = &(u[uIJK(ielem,0,0)]);
+            double a = wavespeed(ui, air);
+            double dt = dx*CFL/(a + fabs(ui[NSP]));
+
+            for (int kvar=0; kvar<NSP+3; kvar++){
+                int id = uIJK(ielem,0,kvar);
+                u[id] += dt*dv[id];
+                dv[id] = 0.0; //reset for next iteration (just to be safe)
+            }
+        }
+
+        if (iter%10 ==0) {
+            IterUpdate(iter, nelem, res);
         }
     }
 
-
+    free(D);
 }

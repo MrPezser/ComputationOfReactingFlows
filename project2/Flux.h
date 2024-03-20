@@ -9,6 +9,7 @@
 #include "Chemistry.h"
 
 //void LDFSS(double A, double* uL, double* uR, Chem &air, double* flux);
-void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u,double* Acc,double* Afa,double* dAdx, double* res)
+double wavespeed(const double* u, Chem& air);
+void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,double* Acc,double* Afa,double* dAdx, double* res);
 
 #endif //PROJECT2_FLUX_H
