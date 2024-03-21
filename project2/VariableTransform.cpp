@@ -51,7 +51,7 @@ void BuildDudv(double* unk, Chem &air, double** D) {
         D[NSP+1][isp] = e[isp] + 0.5*unk[NSP]*unk[NSP]; //- (rhoCv/rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1]
     }
     D[NSP+1][NSP]   = unk[NSP]*rho_mix;
-    D[NSP+1][NSP+1] = rhoCv - rho_mix*0.5*unk[NSP]*unk[NSP] / unk[NSP+1];
+    D[NSP+1][NSP+1] = rhoCv + rho_mix*0.5*unk[NSP]*unk[NSP] / unk[NSP+1];
     D[NSP+1][NSP+2] = 0.0; //leave 0 for now
 
 

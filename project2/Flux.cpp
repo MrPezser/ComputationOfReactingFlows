@@ -126,7 +126,7 @@ c --------------------------------------------------------------------
 }
 
 
-void EulerFlux(Chem& air, const double *u, double* flux){
+void EulerFlux(Chem& air, const double *u, double A, double* flux){
     //Convert to multispecies
     double rho_mix{0.0}, p{};
 
@@ -142,9 +142,13 @@ void EulerFlux(Chem& air, const double *u, double* flux){
     }
 
 
-    flux[NSP] = rho_mix*u[NSP]*u[NSP] + p;
-    flux[NSP+1] = u[NSP]*(air.Calc_rho_h_Mix(u) + 0.5*rho_mix*u[NSP]*u[NSP]);
+    flux[NSP] = ( rho_mix*u[NSP]*u[NSP] + p);
+    flux[NSP+1] = u[NSP]*( air.Calc_rho_h_Mix(u) + 0.5*rho_mix*u[NSP]*u[NSP] );
     flux[NSP+2] = 0.0;
+
+    for (int k=0; k<NSP+3; k++) {
+        flux[k] *= A;
+    }
 
 }
 
@@ -200,12 +204,12 @@ void LeerFlux(const double A, const double* uL, const double* uR, Chem& air, dou
     }
 
     if (ML >= 1.0){
-        EulerFlux(air, uL, flux);
+        EulerFlux(air, uL, A, flux);
         return;
     }
 
     if (MR <= -1.0){
-        EulerFlux(air, uR, flux);
+        EulerFlux(air, uR, A, flux);
         return;
     }
 
@@ -243,10 +247,10 @@ void LeerFlux(const double A, const double* uL, const double* uR, Chem& air, dou
 
     flux[NSP]   = A * (fPlus[1] + fMins[1]);
     flux[NSP+1] = A * (fPlus[2] + fMins[2]);
-    flux[NSP+2] = 0.0;
+    flux[NSP+2] = A*0.0;
 }
 
-void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,double* Acc,double* Afa,double* dAdx, double* res) {
+void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,double* Acc,double* Afa,const double* dAdx, double* res) {
     //Find the common flux at each face
     double flux_comm[(nelem+1)*(NSP+3)];
     double *uL, *uR, *flux;
@@ -287,6 +291,6 @@ void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,d
         for (int s=0; s<NSP; s++){
             p += u[uIJK(ielem,0,s)] * (air.Ruv/air.Mw[s]) * u[uIJK(ielem,0,NSP+1)];
         }
-        res[fIJ(ielem, NSP)] += p*dAdx[ielem];
+        res[fIJ(ielem, NSP)] += p*(Afa[ielem+1] - Afa[ielem])/dx;//dAdx[ielem];
     }
 }

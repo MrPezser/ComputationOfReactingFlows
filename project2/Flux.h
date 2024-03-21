@@ -10,6 +10,6 @@
 
 //void LDFSS(double A, double* uL, double* uR, Chem &air, double* flux);
 double wavespeed(const double* u, Chem& air);
-void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,double* Acc,double* Afa,double* dAdx, double* res);
+void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,double* Acc,double* Afa,const double* dAdx, double* res);
 
 #endif //PROJECT2_FLUX_H

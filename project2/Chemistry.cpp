@@ -19,22 +19,27 @@ void Chem::LoadCurveFits(){
     }
 }
 
-void Chem::Calc_h_Curve(int isp, double T, double* hs) {
+void Chem::Calc_h_Curve(int isp, double T, double Tv, double* hs) {
+    ///For thermo noneq -> h = h(Tve) + Cp(Ttr-T0) - Cp(Tve-T0)
     // Calculate species specific enthalpy
     // isp = index of species
     // T = temperature
     // Cp = output Cp at temperature
 
     double T2,T3,T4,T5;
-    T2 = T*T;
-    T3 = pow(T,3);
-    T4 = pow(T,4);
-    T5 = pow(T,5);
+    T2 = Tv*Tv;
+    T3 = pow(Tv,3);
+    T4 = pow(Tv,4);
+    T5 = pow(Tv,5);
+    double CPtr, CPve;
+    CPtr = Calc_cp_curve(isp,T);
+    CPtr = Calc_cp_curve(isp,Tv);
+
 
     if (T > 1000) {
-        hs[isp] = (Ruv/Mw[isp])*(Ah[isp]*T + Bh[isp]*T2/2.0 + Ch[isp]*T3/3.0 + Dh[isp]*T4/4.0 + Eh[isp]*T5/5.0 + Fh[isp]);
+        hs[isp] = (Ruv/Mw[isp])*(Ah[isp]*Tv + Bh[isp]*T2/2.0 + Ch[isp]*T3/3.0 + Dh[isp]*T4/4.0 + Eh[isp]*T5/5.0 + Fh[isp]) + CPtr - CPve;
     } else {  //T<1000
-        hs[isp] = (Ruv/Mw[isp])*(Al[isp]*T + Bl[isp]*T2/2.0 + Cl[isp]*T3/3.0 + Dl[isp]*T4/4.0 + El[isp]*T5/5.0 + Fl[isp]);
+        hs[isp] = (Ruv/Mw[isp])*(Al[isp]*Tv + Bl[isp]*T2/2.0 + Cl[isp]*T3/3.0 + Dl[isp]*T4/4.0 + El[isp]*T5/5.0 + Fl[isp]) + CPtr - CPve;
     }
 }
 

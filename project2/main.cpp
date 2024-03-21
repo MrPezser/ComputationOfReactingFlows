@@ -110,8 +110,9 @@ int main() {
     fprintf(fout, "x\trhoN2\trhoO2\trhoNO\trhoN\trhoO\tu\tT\tTv\n");
 
     for (int i=0; i<nelem; i++) {
-            fprintf(fout,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",xcc[i],
-                   u[uIJK(i,0,0)], u[uIJK(i,0,1)], u[uIJK(i,0,2)], u[uIJK(i,0,3)], u[uIJK(i,0,4)], u[uIJK(i,0,5)], u[uIJK(i,0,6)], u[uIJK(i,0,7)]);
+            fprintf(fout,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",xcc[i],
+                   u[uIJK(i,0,0)], u[uIJK(i,0,1)], u[uIJK(i,0,2)], u[uIJK(i,0,3)], u[uIJK(i,0,4)], u[uIJK(i,0,5)],
+                   u[uIJK(i,0,6)], u[uIJK(i,0,7)], Acc[i], dAdx[i], xfa[i], Afa[i]);
     }
 
 

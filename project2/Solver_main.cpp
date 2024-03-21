@@ -57,7 +57,7 @@ void solve_nonreacting(int nelem, double dx,double CFL, Chem &air, double* u0, d
         //========== Solve linear system on each element
         for (int ielem=0; ielem<nelem; ielem++) {
             double* unk = &(u[uIJK(ielem,0,0)]);
-            double tol = 1e-8;
+            double tol = 1e-12;
             int P[NSP+3]{}; //permutation vector for pivoting
             int N = NSP+3;
 
