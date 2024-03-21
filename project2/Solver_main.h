@@ -7,7 +7,8 @@
 
 #include "Chemistry.h"
 
-#define MXITER 2000//1e6
-void solve_nonreacting(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,double* Acc,double* Afa,double* dAdx);
+#define MXITER 1e5
+#define RESTOL 1e-5
+void solve_nonreacting(int nelem, double dx,double CFL, Chem &air, double* u0, double* u, double* xcc,double* Acc,double* Afa,double* dAdx);
 
 #endif //PROJECT2_SOLVER_MAIN_H

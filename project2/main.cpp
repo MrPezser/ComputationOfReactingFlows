@@ -23,7 +23,7 @@ int main() {
     double CFL;
 
     nelem = 200;
-    CFL = 0.5;
+    CFL = 0.2;
 
     ///MAKE SURE THAT THERE IS CONSISTENCE AMONG THE INDEXING FOR DIFFEREENT FACE-VALUED VARIABLES/ARRAYS
 
@@ -103,7 +103,7 @@ int main() {
 
     Chem air = Chem();
 
-    solve_nonreacting(nelem, dx, CFL, air, u0, u, Acc, Afa, dAdx);
+    solve_nonreacting(nelem, dx, CFL, air, u0, u, xcc, Acc, Afa, dAdx);
 
     //print soln
     FILE* fout = fopen("waveout.tec", "w");
