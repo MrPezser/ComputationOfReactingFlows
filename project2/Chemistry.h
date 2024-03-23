@@ -20,13 +20,20 @@ public:
     //molecular weight
     double Mw[NSP]{};
     double Ruv = 8314.34;
+    double Tref = 298.15;
 
     Chem() {
         LoadCurveFits();
     }
-    void Calc_h_Curve(int isp, double T, double Tv, double* hs);
-    double Calc_rho_h_Mix(const double* unk);
-    double Calc_cp_curve(int isp, double T);
-};
+    double Calc_h_Curve(int isp, double T);
+    double Calc_rho_htr_Mix(const double* unk);
+    double Calc_cp_Curve(int isp, double T);
+    double Get_cptr(int isp, double T);
+    double Get_htr(int isp, double T);
+    double Get_hv(int isp, double T, double Tv);
+    double Get_cpv(int isp, double T, double Tv);
+    double Get_htotal(int isp, double T, double Tv);
+    double Get_cptotal(int isp,double T,double Tv);
+    };
 
 #endif //PROJECT2_CHEMISTRY_H

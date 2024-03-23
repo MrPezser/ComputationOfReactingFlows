@@ -19,31 +19,27 @@ void Chem::LoadCurveFits(){
     }
 }
 
-void Chem::Calc_h_Curve(int isp, double T, double Tv, double* hs) {
-    ///For thermo noneq -> h = h(Tve) + Cp(Ttr-T0) - Cp(Tve-T0)
-    // Calculate species specific enthalpy
+double Chem::Calc_h_Curve(int isp, double T) {
+    // Calculate species specific enthalpy according to curve fit alone
     // isp = index of species
     // T = temperature
     // Cp = output Cp at temperature
 
     double T2,T3,T4,T5;
-    T2 = Tv*Tv;
-    T3 = pow(Tv,3);
-    T4 = pow(Tv,4);
-    T5 = pow(Tv,5);
-    double CPtr, CPve;
-    CPtr = Calc_cp_curve(isp,T);
-    CPtr = Calc_cp_curve(isp,Tv);
+    T2 = T*T;
+    T3 = pow(T,3);
+    T4 = pow(T,4);
+    T5 = pow(T,5);
 
 
     if (T > 1000) {
-        hs[isp] = (Ruv/Mw[isp])*(Ah[isp]*Tv + Bh[isp]*T2/2.0 + Ch[isp]*T3/3.0 + Dh[isp]*T4/4.0 + Eh[isp]*T5/5.0 + Fh[isp]) + CPtr - CPve;
-    } else {  //T<1000
-        hs[isp] = (Ruv/Mw[isp])*(Al[isp]*Tv + Bl[isp]*T2/2.0 + Cl[isp]*T3/3.0 + Dl[isp]*T4/4.0 + El[isp]*T5/5.0 + Fl[isp]) + CPtr - CPve;
+        return (Ruv/Mw[isp])*(Ah[isp]*T + Bh[isp]*T2/2.0 + Ch[isp]*T3/3.0 + Dh[isp]*T4/4.0 + Eh[isp]*T5/5.0 + Fh[isp]);
+    } else {  //T<100
+        return (Ruv/Mw[isp])*(Al[isp]*T + Bl[isp]*T2/2.0 + Cl[isp]*T3/3.0 + Dl[isp]*T4/4.0 + El[isp]*T5/5.0 + Fl[isp]);
     }
 }
 
-double Chem::Calc_cp_curve(int isp, double T) {
+double Chem::Calc_cp_Curve(int isp, double T) {
     double T2,T3,T4,T5;
     T2 = T*T;
     T3 = pow(T,3);
@@ -56,14 +52,65 @@ double Chem::Calc_cp_curve(int isp, double T) {
     }
 }
 
-double Chem::Calc_rho_h_Mix(const double* unk) {
+//Translational Thermo
+double Chem::Get_cptr(int isp, double T){
+    if (T > 1000) {
+        return (Ruv / Mw[isp]) * (Ah[isp]);
+    }else{
+        return (Ruv / Mw[isp]) * (Al[isp]);
+    }
+}
+double Chem::Get_htr(int isp, double T){
+    if (T > 1000) {
+        return (Ruv / Mw[isp]) * (Ah[isp]*T + Fh[isp]);
+    } else {
+        return (Ruv / Mw[isp]) * (Al[isp]*T + Fl[isp]);
+    }
+}
+
+//Vibrational Thermo
+double Chem::Get_hv(int isp, double T, double Tv) {
+    double cptr, hv;
+    cptr = Get_cptr(isp, T);
+    hv = Calc_h_Curve(isp, Tv);
+
+    hv -= cptr*(Tv - Tref);
+    return hv;
+}
+double Chem::Get_cpv(int isp, double T, double Tv) {
+    double cptr, cpv;
+    cptr = Get_cptr(isp, T);
+    cpv = Calc_cp_Curve(isp, Tv);
+
+    cpv -= cptr;
+    return cpv;
+}
+
+//Total thermo
+double Chem::Get_htotal(int isp, double T, double Tv){
+    double hv, htr;
+    htr = Get_htr(isp,T);
+    hv = Get_hv(isp,T,Tv);
+
+    return hv + htr;
+}
+double Chem::Get_cptotal(int isp,double T,double Tv){
+    double cptr, cpv;
+    cptr = Get_cptr(isp, T);
+    cpv = Get_cpv(isp,T,Tv);
+
+    return cptr + cpv;
+}
+
+double Chem::Calc_rho_htr_Mix(const double* unk) {
     //calculate the mixture enthalpy
-    double hs[NSP], T, rho_h;
+    double hs[NSP], T, Tv, rho_h;
     T = unk[NSP+1];
+    Tv = unk[NSP+2];
     rho_h = 0.0;
 
     for (int isp=0; isp<NSP; isp++) {
-        Calc_h_Curve(isp, T, hs);
+        hs[isp] = Get_htr(isp, T);
         rho_h += unk[isp]*hs[isp];
     }
 

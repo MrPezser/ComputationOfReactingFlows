@@ -29,8 +29,8 @@ int main() {
 
     double vel0, rho0, T0, pb, YN20, YNO0, YO0, YN0, YO20;
     //Initial state as given
-    vel0 = 2000;//3500.0;
-    rho0 = 2.34e-4;//0.0003074;
+    vel0 = 3500.0;
+    rho0 = 0.0003074;
     T0 = 350;
     YN20 = 0.7643;
     YNO0 = 0.0;

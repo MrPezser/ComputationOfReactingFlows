@@ -15,7 +15,7 @@ double wavespeed(const double* u, Chem& air){
     rhoCv = 0.0;
     rho = 0.0;
     for (int isp=0; isp<NSP; isp++){
-        cp = air.Calc_cp_curve(isp, u[NSP]);
+        cp = air.Get_cptr(isp, u[NSP+1]);  ///change this just to do total cp???
 
         rhoR  += u[isp]*air.Ruv/air.Mw[isp];
         rhoCv += u[isp]*(cp - air.Ruv/air.Mw[isp]);
@@ -39,8 +39,9 @@ double pressure(const double* u, Chem& air){
     return p;
 }
 
+/*
 void LDFSS(const double A, const double* uL, const double* uR, Chem &air, double* flux) {
-    /*
+    /
 c --------------------------------------------------------------------
 c ----- inviscid flux contribution (LDFSS)
 c
@@ -55,7 +56,7 @@ c     dx   - mesh spacing for cell
 c     res  - residual vector
 c     ev - interface flux vector
 c --------------------------------------------------------------------
-    */
+    /
     ///MOVE CELL SPECIFIC CALCULATIONS (PRESSURE, DENSITY, ENTHALPY,....) OUTSIDE OF FLUX LOOP
 
     //Calculate wavespeed
@@ -79,8 +80,8 @@ c --------------------------------------------------------------------
 
     //Calculate Total Enthaply
     double hoL, hoR;
-    hoL = air.Calc_rho_h_Mix(uL)/rhoL + 0.5*uL[NSP]*uL[NSP];//*rhoL;
-    hoR = air.Calc_rho_h_Mix(uR)/rhoR + 0.5*uR[NSP]*uR[NSP];//*rhoR;
+    hoL = air.Calc_rho_h_Mix(uL)/rhoL + 0.5*uL[NSP]*uL[NSP];// *rhoL;
+    hoR = air.Calc_rho_h_Mix(uR)/rhoR + 0.5*uR[NSP]*uR[NSP];// *rhoR;
 
     // Flux Calculation
     double xml = uL[NSP]/ahalf;
@@ -124,11 +125,11 @@ c --------------------------------------------------------------------
     flux[NSP+1] = fml*hoL + fmr*hoR;                    //total energy
     flux[NSP+2] = 0.0;                                  //vibrational energy
 }
-
+*/
 
 void EulerFlux(Chem& air, const double *u, double A, double* flux){
     //Convert to multispecies
-    double rho_mix{0.0}, p{};
+    double rho_mix{0.0}, p{}, ev[NSP]{}, hv[NSP]{}, rho_ev{0.0};
 
     for (int k=0; k<NSP+3; k++) {
         flux[k] = 0.0;
@@ -139,12 +140,14 @@ void EulerFlux(Chem& air, const double *u, double A, double* flux){
     for (int isp=0; isp<NSP; isp++){
         flux[isp] = u[isp]*u[NSP];
         rho_mix += u[isp];
+        hv[isp] = air.Get_hv(isp, u[NSP+1], u[NSP+2]);
+        rho_ev += u[isp]*hv[isp];
     }
 
 
     flux[NSP] = ( rho_mix*u[NSP]*u[NSP] + p);
-    flux[NSP+1] = u[NSP]*( air.Calc_rho_h_Mix(u) + 0.5*rho_mix*u[NSP]*u[NSP] );
-    flux[NSP+2] = 0.0;
+    flux[NSP+1] = u[NSP]*( air.Calc_rho_htr_Mix(u) + rho_ev + 0.5*rho_mix*u[NSP]*u[NSP] );
+    flux[NSP+2] = u[NSP]*rho_ev;
 
     for (int k=0; k<NSP+3; k++) {
         flux[k] *= A;
@@ -219,20 +222,29 @@ void LeerFlux(const double A, const double* uL, const double* uR, Chem& air, dou
     if(_isnan(F1L+F1R)){
         throw std::overflow_error("getting NAN mass flux!");
     }
+    double FmyspL[NSP],FmyspR[NSP];
     for (int isp=0; isp<NSP; isp++) {
-        flux[isp] = A * (F1L*uL[isp]/rhoL + F1R*uR[isp]/rhoR);       //species  density
+        FmyspL[isp] = uL[isp]/rhoL;
+        FmyspR[isp] = uR[isp]/rhoR;
+        flux[isp] = A * (F1L*FmyspL[isp] + F1R*uR[isp]/rhoR);       //species  density
     }
 
-    //should figure out a better way to do this
-    double rhoCv, rhoRt, cp, h[NSP];
+    //should figure out a better way to do this, currently just averaging L and R to find gamma
+    double rhoCv, rhoRt, EvL{}, EvR{}, cp, h[NSP];
     rhoCv = 0.0;
     rhoRt = 0.0;
     for (int isp=0; isp<NSP; isp++) {
-        cp = air.Calc_cp_curve(isp, uL[NSP]);
-        air.Calc_h_Curve(isp, uL[NSP + 1], h);
+        cp = air.Get_cptr(isp, uL[NSP+1]);
+        rhoRt  += 0.5*uL[isp] * air.Ruv / air.Mw[isp] * uL[NSP+1];
+        rhoCv  += 0.5*uL[isp] * (cp - air.Ruv / air.Mw[isp]);
 
-        rhoRt += uL[isp] * air.Ruv / air.Mw[isp];
-        rhoCv += uL[isp] * (cp - air.Ruv / air.Mw[isp]);
+        EvL += FmyspL[isp] * air.Get_hv(isp,uL[NSP+1], uL[NSP+2]);
+
+        cp = air.Get_cptr(isp, uR[NSP+1]);
+        rhoRt  += 0.5*uR[isp] * air.Ruv / air.Mw[isp] * uR[NSP+1];
+        rhoCv  += 0.5*uR[isp] * (cp - air.Ruv / air.Mw[isp]);
+
+        EvR += FmyspR[isp] * air.Get_hv(isp,uR[NSP+1], uR[NSP+2]);
     }
 
     double gam = 1 + rhoRt/rhoCv;
@@ -240,24 +252,32 @@ void LeerFlux(const double A, const double* uL, const double* uR, Chem& air, dou
     double A2 = ((gam - 1) * uL[NSP]) + (2.0 * aL); //vL
     fPlus[1] = F1L * A2 / gam;
     fPlus[2] = F1L * A2*A2 * 0.5 / (gam*gam - 1.0);
+    fPlus[3] = F1R * EvL;
 
     A2 = -((gam - 1) * uR[NSP]) - (2.0 * aR); //vR
     fMins[1] = F1R * A2 / gam;
     fMins[2] = F1R * A2*A2 * 0.5 / (gam*gam - 1.0);
+    fPlus[3] = F1R * EvR;
 
     flux[NSP]   = A * (fPlus[1] + fMins[1]);
     flux[NSP+1] = A * (fPlus[2] + fMins[2]);
-    flux[NSP+2] = A*0.0;
+    flux[NSP+2] = A * (fPlus[3] + fMins[3]);
+}
+
+void PressureBC(Chem& air, double* u, double* uGhost){
+
 }
 
 void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,double* Acc,double* Afa,const double* dAdx, double* res) {
     //Find the common flux at each face
-    double flux_comm[(nelem+1)*(NSP+3)];
+    double flux_comm[(nelem+1)*(NSP+3)], uBack[NSP+3];
     double *uL, *uR, *flux;
 
     for (int iu=0; iu<nelem*(NSP+3)*NDEGR; iu++) {
         res[iu] = 0.0;
     }
+
+
 
     //Interior faces
     for (int iface=1; iface<nelem; iface++) {
@@ -267,7 +287,7 @@ void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,d
 
         LeerFlux(Afa[iface], uL, uR, air, flux);
     }
-    //Boundary faces - just extrapolate RHS for now - need to do pressure BC
+    //Boundary faces - pressure BC outflow
     uL = u0;
     uR = &(u[uIJK(0, 0, 0)]);
     flux = &flux_comm[fIJ(0, 0)];
@@ -291,6 +311,6 @@ void CalcRes(int nelem, double dx,double CFL, Chem &air, double* u0, double* u,d
         for (int s=0; s<NSP; s++){
             p += u[uIJK(ielem,0,s)] * (air.Ruv/air.Mw[s]) * u[uIJK(ielem,0,NSP+1)];
         }
-        res[fIJ(ielem, NSP)] += p*(Afa[ielem+1] - Afa[ielem])/dx;//dAdx[ielem];
+        res[fIJ(ielem, NSP)] += p*(Afa[ielem+1] - Afa[ielem])/dx; // dAdx[ielem];
     }
 }
