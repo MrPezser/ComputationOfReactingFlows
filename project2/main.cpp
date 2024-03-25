@@ -17,17 +17,35 @@ double area_slope(const double x){
     }
 }
 
+void restart(int nelem, double* u){
+    FILE* frst = fopen("restart.dat","r");
+    if (frst==nullptr) {
+        printf("No restart file found.\n");
+        return;
+    }
+
+    fscanf(frst,"%*[^\n]\n"); //skip header
+    for (int ielem=0; ielem<nelem; ielem++) {
+        int id = uIJK(ielem, 0, 0);
+        fscanf(frst, "%*lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf%*[^\n]\n", &(u[id]), &(u[id+1]), &(u[id+2]), &(u[id+3]),
+               &(u[id+4]), &(u[id+5]), &(u[id+6]), &(u[id+7]));
+    }
+
+}
+
 int main() {
     //Inputs
     int nelem;
     double CFL;
+    double pb_ratio, pb,p0{};
 
     nelem = 200;
     CFL = 0.2;
+    pb_ratio = 200;
 
     ///MAKE SURE THAT THERE IS CONSISTENCE AMONG THE INDEXING FOR DIFFEREENT FACE-VALUED VARIABLES/ARRAYS
-
-    double vel0, rho0, T0, pb, YN20, YNO0, YO0, YN0, YO20;
+    Chem air = Chem();
+    double vel0, rho0, T0, YN20, YNO0, YO0, YN0, YO20;
     //Initial state as given
     vel0 = 3500.0;
     rho0 = 0.0003074;
@@ -75,15 +93,22 @@ int main() {
     u0[6] = T0;  //trns-rot temperature
     u0[7] = T0;  //vib temperautre
 
+    //
+    for (int isp=0;isp<NSP;isp++) {
+        p0 += u0[isp] * (air.Ruv/air.Mw[isp]) * T0;
+    }
+    pb = p0*pb_ratio;
+
     //Calculate post shock conditions (approx Mach 9.33333 normal shock)
-    u0back[0] = u0[0];
-    u0back[1] = u0[1];
-    u0back[2] = u0[2];
-    u0back[3] = u0[3];
-    u0back[4] = u0[4];
-    u0back[5] = u0[5];//616.808;
-    u0back[6] = u0[6];//6258.0;
-    u0back[7] = u0[7];//6258.0;
+    double rho_shock = 5.67322239;
+    u0back[0] = u0[0]*rho_shock;
+    u0back[1] = u0[1]*rho_shock;
+    u0back[2] = u0[2]*rho_shock;
+    u0back[3] = u0[3]*rho_shock;
+    u0back[4] = u0[4]*rho_shock;
+    u0back[5] = 616.56;
+    u0back[6] = u0[6] * 17.8217024;
+    u0back[7] = u0[7];
 
     //Intialize flow
     auto u = (double*)malloc(nelem*NDEGR*(NSP+3)*sizeof(double));
@@ -91,7 +116,7 @@ int main() {
         for (int jdegr=0; jdegr<NDEGR; jdegr++){
             for (int kvar=0; kvar<(NSP+3); kvar++){
 
-                if (xfa[ielem]<1.0) {   //Freestream conditions
+                if (xfa[ielem]<1.2) {   //Freestream conditions
                     u[uIJK(ielem, jdegr, kvar)] = u0[kvar];
 
                 } else {                //Post-Shock conditions
@@ -101,16 +126,16 @@ int main() {
         }
     }
 
-    Chem air = Chem();
+    restart(nelem,u);
 
-    solve_nonreacting(nelem, dx, CFL, air, u0, u, xcc, Acc, Afa, dAdx);
+    solve_nonreacting(nelem, dx, CFL, pb, air, u0, u, xcc, Acc, Afa, dAdx);
 
     //print soln
     FILE* fout = fopen("waveout.tec", "w");
     fprintf(fout, "x\trhoN2\trhoO2\trhoNO\trhoN\trhoO\tu\tT\tTv\n");
 
     for (int i=0; i<nelem; i++) {
-            fprintf(fout,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",xcc[i],
+            fprintf(fout,"%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",xcc[i],
                    u[uIJK(i,0,0)], u[uIJK(i,0,1)], u[uIJK(i,0,2)], u[uIJK(i,0,3)], u[uIJK(i,0,4)], u[uIJK(i,0,5)],
                    u[uIJK(i,0,6)], u[uIJK(i,0,7)], Acc[i], dAdx[i], xfa[i], Afa[i]);
     }

@@ -23,7 +23,7 @@ int IterUpdate(int iter, int nelem, const double* res){
         ressum[iv] = sqrt(ressum[iv]);
         maxres = fmax(maxres, ressum[iv]);
     }
-    printf("Res:%6.2e %6.2e %6.2e %6.2e %6.2e %6.2e %6.2e %6.2e ",
+    printf("Res:%8.1e %8.1e %8.1e %8.1e %8.1e %8.1e %8.1e %8.1e ",
            ressum[0],ressum[1],ressum[2],ressum[3],ressum[4],ressum[5],ressum[6],ressum[7]);
 
     printf("\n");
@@ -35,7 +35,7 @@ int IterUpdate(int iter, int nelem, const double* res){
     }
 }
 
-void solve_nonreacting(int nelem, double dx,double CFL, Chem &air, double* u0, double* u, double* xcc, double* Acc,double* Afa,double* dAdx) {
+void solve_nonreacting(int nelem, double dx, double CFL, double pb, Chem &air, double* u0, double* u, double* xcc, double* Acc,double* Afa,double* dAdx) {
     //Solve the nonreacting / chemically frozen problem
 
     //Create some arrays
@@ -52,7 +52,7 @@ void solve_nonreacting(int nelem, double dx,double CFL, Chem &air, double* u0, d
         //Loop through elements and conduct local timestepping
 
         //========== Calculate residual
-        CalcRes(nelem, dx,CFL, air, u0, u,Acc,Afa,dAdx, res);
+        CalcRes(nelem, dx, CFL, pb, air, u0, u,Acc,Afa,dAdx, res);
 
         //========== Solve linear system on each element
         for (int ielem=0; ielem<nelem; ielem++) {
@@ -90,7 +90,7 @@ void solve_nonreacting(int nelem, double dx,double CFL, Chem &air, double* u0, d
             for (int kvar=0; kvar<NSP+3; kvar++){
                 int id = uIJK(ielem,0,kvar);
                 u[id] += dt*dv[id];
-                dv[id] = 0.0; //reset for next iteration (just to be safe)
+                dv[id] = 0.0;
             }
         }
 
@@ -102,7 +102,7 @@ void solve_nonreacting(int nelem, double dx,double CFL, Chem &air, double* u0, d
             fprintf(fout, "x\trhoN2\trhoO2\trhoNO\trhoN\trhoO\tu\tT\tTv\n");
 
             for (int i=0; i<nelem; i++) {
-                fprintf(fout,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",xcc[i],
+                fprintf(fout,"%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",xcc[i],
                         u[uIJK(i,0,0)], u[uIJK(i,0,1)], u[uIJK(i,0,2)], u[uIJK(i,0,3)], u[uIJK(i,0,4)], u[uIJK(i,0,5)], u[uIJK(i,0,6)], u[uIJK(i,0,7)]);
             }
             fclose(fout);

@@ -21,9 +21,15 @@ public:
     double Mw[NSP]{};
     double Ruv = 8314.34;
     double Tref = 298.15;
+    double thetav[NSP]{};
 
     Chem() {
         LoadCurveFits();
+        thetav[0] = 3395.0;
+        thetav[1] = 2239.0;
+        thetav[2] = 2817.0;
+        thetav[3] = -1.0;
+        thetav[4] = -1.0;
     }
     double Calc_h_Curve(int isp, double T);
     double Calc_rho_htr_Mix(const double* unk);

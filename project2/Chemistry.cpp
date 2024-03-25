@@ -32,7 +32,7 @@ double Chem::Calc_h_Curve(int isp, double T) {
     T5 = pow(T,5);
 
 
-    if (T > 1000) {
+    if (T > 1000.0) {
         return (Ruv/Mw[isp])*(Ah[isp]*T + Bh[isp]*T2/2.0 + Ch[isp]*T3/3.0 + Dh[isp]*T4/4.0 + Eh[isp]*T5/5.0 + Fh[isp]);
     } else {  //T<100
         return (Ruv/Mw[isp])*(Al[isp]*T + Bl[isp]*T2/2.0 + Cl[isp]*T3/3.0 + Dl[isp]*T4/4.0 + El[isp]*T5/5.0 + Fl[isp]);
@@ -45,7 +45,7 @@ double Chem::Calc_cp_Curve(int isp, double T) {
     T3 = pow(T,3);
     T4 = pow(T,4);
 
-    if (T >= 1000) {
+    if (T >= 1000.0) {
         return (Ruv/Mw[isp])*(Ah[isp] + Bh[isp]*T + Ch[isp]*T2 + Dh[isp]*T3 + Eh[isp]*T4);
     } else {  //T<1000
         return (Ruv/Mw[isp])*(Al[isp] + Bl[isp]*T + Cl[isp]*T2 + Dl[isp]*T3 + El[isp]*T4);
@@ -54,30 +54,39 @@ double Chem::Calc_cp_Curve(int isp, double T) {
 
 //Translational Thermo
 double Chem::Get_cptr(int isp, double T){
-    if (T > 1000) {
+    if (T > 1000.0) {
         return (Ruv / Mw[isp]) * (Ah[isp]);
     }else{
         return (Ruv / Mw[isp]) * (Al[isp]);
     }
 }
 double Chem::Get_htr(int isp, double T){
-    if (T > 1000) {
-        return (Ruv / Mw[isp]) * (Ah[isp]*T + Fh[isp]);
+    if (T > 1000.0) {
+        return (Ruv / Mw[isp]) * (Ah[isp]*(T) + Fh[isp]);
     } else {
-        return (Ruv / Mw[isp]) * (Al[isp]*T + Fl[isp]);
+        return (Ruv / Mw[isp]) * (Al[isp]*(T) + Fl[isp]);
     }
 }
 
 //Vibrational Thermo
 double Chem::Get_hv(int isp, double T, double Tv) {
-    double cptr, hv;
+//    if (isp>=3) return 0.0;
+
+    double cptr, hv, h_f;
     cptr = Get_cptr(isp, T);
     hv = Calc_h_Curve(isp, Tv);
 
-    hv -= cptr*(Tv - Tref);
+    if (T > 1000.0) {
+        h_f = Fh[isp];
+    } else {
+        h_f = Fl[isp];
+    }
+
+    hv += -cptr*(Tv - Tref) - h_f;
     return hv;
 }
 double Chem::Get_cpv(int isp, double T, double Tv) {
+//    if (isp>=3) return 0.0;
     double cptr, cpv;
     cptr = Get_cptr(isp, T);
     cpv = Calc_cp_Curve(isp, Tv);
