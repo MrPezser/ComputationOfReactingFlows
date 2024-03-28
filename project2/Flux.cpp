@@ -254,7 +254,7 @@ void PressureBC(double pb, double p, Chem& air, const double* u, double* uGhost)
 void CalcRes(int nelem, double dx, double CFL, double pb, Chem &air, State* ElemVar, double* u0, double* u,
              const double* Acc,const double* Afa,const double* dAdx, double* res) {
     //Find the common flux at each face
-    double flux_comm[(nelem+1)*(NSP+3)], uBack[NSP+3], omega[NSP];
+    double flux_comm[(nelem+1)*(NSP+3)], uBack[NSP+3], omega[NSP]{};
     double tne_src{};
     double *uL, *uR, *flux;
     State varL, varR;
@@ -315,9 +315,11 @@ void CalcRes(int nelem, double dx, double CFL, double pb, Chem &air, State* Elem
         }
 
         //Chemical source terms
-        CalcOmega(ui, air, var, omega);
-        for (int isp=0; isp<NSP;isp++) {
-            res[id+isp] += Acc[ielem]*omega[isp];
+        if (var.Tstar > 1000) {
+            CalcOmega(ui, air, var, omega);
+            for (int isp = 0; isp < NSP; isp++) {
+                res[id + isp] += Acc[ielem] * omega[isp];
+            }
         }
 
         //Pressure source term

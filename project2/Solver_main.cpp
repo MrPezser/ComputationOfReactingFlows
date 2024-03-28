@@ -101,7 +101,7 @@ int solve_nonreacting(int nelem, double dx, double CFL, double pb, Chem &air, do
         for (int ielem=0; ielem<nelem; ielem++){
             double* ui = &(u[uIJK(ielem,0,0)]);
             double a = wavespeed(ui, air);
-            double dt = dx*CFL/(a + fabs(ui[NSP]));
+            double dt = 1e-9;//dx*CFL/(a + fabs(ui[NSP]));
 
             for (int kvar=0; kvar<NSP+3; kvar++){
                 int id = uIJK(ielem,0,kvar);
@@ -114,7 +114,7 @@ int solve_nonreacting(int nelem, double dx, double CFL, double pb, Chem &air, do
 
 
 
-        if (iter%1000 ==0) {
+        if (iter%10000 ==0) {
             iconv = IterUpdate(iter, nelem, res);
             //save soln file
             FILE* fout = fopen("waveout.tec", "w");
