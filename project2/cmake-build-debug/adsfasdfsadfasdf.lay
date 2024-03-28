@@ -77,8 +77,8 @@ $!GlobalLinePlot
     Show = Yes
     XYPos
       {
-      X = 44.339
-      Y = 62.624
+      X = 75.613
+      Y = 71.27
       }
     }
 $!LineMap  [1]
@@ -305,9 +305,9 @@ $!XYLineAxis
 $!XYLineAxis 
   YDetail 1
     {
-    RangeMin = 2.000000000000004907E-05
-    RangeMax = 0.0002199999999999998181
-    GRSpacing = 2E-05
+    RangeMin = -0.00050000000000000044409
+    RangeMax = 0.003499999999999993134
+    GRSpacing = 0.0005
     }
 ### Frame Number 2 ###
 $!CreateNewFrame 
@@ -329,7 +329,7 @@ $!FrameName  = 'Frame 002'
 $!GlobalTime 
   SolutionTime = 0
 $!DeleteLineMaps 
-$!ActiveLineMaps  =  [1-2]
+$!ActiveLineMaps  =  [1-3]
 $!GlobalLinePlot 
   DataLabels
     {
@@ -340,8 +340,8 @@ $!GlobalLinePlot
     Show = Yes
     XYPos
       {
-      X = 56.727
-      Y = 89.891
+      X = 83.223
+      Y = 63.568
       }
     }
 $!LineMap  [1]
@@ -396,20 +396,46 @@ $!LineMap  [2]
     {
     Color = Green
     }
+$!LineMap  [3]
+  Name = 'Tve'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 9
+    }
+  Lines
+    {
+    Color = Blue
+    }
+  Symbols
+    {
+    Color = Blue
+    FillColor = Blue
+    }
+  BarCharts
+    {
+    Color = Blue
+    FillColor = Blue
+    }
+  ErrorBars
+    {
+    Color = Blue
+    }
 $!XYLineAxis 
   DepXToYRatio = 1
 $!XYLineAxis 
   XDetail 1
     {
-    RangeMin = -0.12748331864534739877
-    RangeMax = 1.672516681354651702
+    RangeMin = -0.20000000000000017764
+    RangeMax = 1.6000000000000000888
     GRSpacing = 0.2
     }
 $!XYLineAxis 
   YDetail 1
     {
-    RangeMin = -828.07011992532443401
-    RangeMax = 2671.9298800746751112
+    RangeMin = 0
+    RangeMax = 6500
     GRSpacing = 500
     }
 $!FrameControl ActivateByNumber

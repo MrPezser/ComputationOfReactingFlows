@@ -18,7 +18,7 @@ double area_slope(const double x){
 }
 
 void restart(int nelem, double* u){
-    FILE* frst = fopen("restart.dat","r");
+    FILE* frst = fopen("restart.dat","r"); //restart_therm_equlib.dat
     if (frst==nullptr) {
         printf("No restart file found.\n");
         return;
@@ -31,6 +31,8 @@ void restart(int nelem, double* u){
                &(u[id+4]), &(u[id+5]), &(u[id+6]), &(u[id+7]));
     }
 
+    fclose(frst);
+
 }
 
 int main() {
@@ -40,7 +42,7 @@ int main() {
     double pb_ratio, pb,p0{};
 
     nelem = 200;
-    CFL = 0.2;
+    CFL = 0.9;
     pb_ratio = 200;
 
     ///MAKE SURE THAT THERE IS CONSISTENCE AMONG THE INDEXING FOR DIFFEREENT FACE-VALUED VARIABLES/ARRAYS
@@ -108,15 +110,17 @@ int main() {
     u0back[4] = u0[4]*rho_shock;
     u0back[5] = 616.56;
     u0back[6] = u0[6] * 17.8217024;
-    u0back[7] = u0[7];
+    u0back[7] = u0[7] * 17.8217024;
 
     //Intialize flow
     auto u = (double*)malloc(nelem*NDEGR*(NSP+3)*sizeof(double));
+    //restart(nelem,u);
     for(int ielem=0; ielem<nelem; ielem++) {
         for (int jdegr=0; jdegr<NDEGR; jdegr++){
+            //u[uIJK(ielem,0,7)] = u[uIJK(ielem,0,6)];
             for (int kvar=0; kvar<(NSP+3); kvar++){
 
-                if (xfa[ielem]<1.2) {   //Freestream conditions
+                if (xfa[ielem]<0.85) {   //Freestream conditions
                     u[uIJK(ielem, jdegr, kvar)] = u0[kvar];
 
                 } else {                //Post-Shock conditions
@@ -125,21 +129,23 @@ int main() {
             }
         }
     }
-
     restart(nelem,u);
 
-    solve_nonreacting(nelem, dx, CFL, pb, air, u0, u, xcc, Acc, Afa, dAdx);
+    int save = solve_nonreacting(nelem, dx, CFL, pb, air, u0, u, xcc, Acc, Afa, dAdx);
 
-    //print soln
-    FILE* fout = fopen("waveout.tec", "w");
-    fprintf(fout, "x\trhoN2\trhoO2\trhoNO\trhoN\trhoO\tu\tT\tTv\n");
+    if (save==1) {
+        //print soln
+        FILE *fout = fopen("waveout.tec", "w");
+        fprintf(fout, "x\trhoN2\trhoO2\trhoNO\trhoN\trhoO\tu\tT\tTv\n");
 
-    for (int i=0; i<nelem; i++) {
-            fprintf(fout,"%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",xcc[i],
-                   u[uIJK(i,0,0)], u[uIJK(i,0,1)], u[uIJK(i,0,2)], u[uIJK(i,0,3)], u[uIJK(i,0,4)], u[uIJK(i,0,5)],
-                   u[uIJK(i,0,6)], u[uIJK(i,0,7)], Acc[i], dAdx[i], xfa[i], Afa[i]);
+        for (int i = 0; i < nelem; i++) {
+            fprintf(fout, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", xcc[i],
+                    u[uIJK(i, 0, 0)], u[uIJK(i, 0, 1)], u[uIJK(i, 0, 2)], u[uIJK(i, 0, 3)], u[uIJK(i, 0, 4)],
+                    u[uIJK(i, 0, 5)],
+                    u[uIJK(i, 0, 6)], u[uIJK(i, 0, 7)], Acc[i], dAdx[i], xfa[i], Afa[i]);
+        }
+        fclose (fout);
     }
-
 
     return 0;
 }

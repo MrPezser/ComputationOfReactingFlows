@@ -13,7 +13,8 @@
 #define fIJ(ielem,kvar)  ((ielem)*(NSP+3) + (kvar))
 #define IJ(i,j,nj) ((i)*(nj) + (j))
 
-#define MXITER 1e5
+//#define MXITER 1
+#define MXITER 1e7
 #define RESTOL 1e-4
 
 #endif //PROJECT2_INDEXING_H
