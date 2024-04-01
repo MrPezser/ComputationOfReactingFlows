@@ -245,13 +245,13 @@ void PressureBC(double pb, double p, Chem& air, const double* u, double* uGhost)
     for (int isp=0;isp<NSP;isp++){
         uGhost[isp] = (u[isp])*rho_ratio;
     }
-    uGhost[NSP] = u[NSP]/rho_ratio;
+    uGhost[NSP] = u[NSP]*rho_ratio;
     uGhost[NSP+1] = u[NSP+1];
     uGhost[NSP+2] = u[NSP+2];
 
 }
 
-void CalcRes(int nelem, double dx, double CFL, double pb, Chem &air, State* ElemVar, double* u0, double* u,
+void CalcRes(int ireact, int nelem, double dx, double CFL, double pb, Chem &air, State* ElemVar, double* u0, double* u,
              const double* Acc,const double* Afa,const double* dAdx, double* res) {
     //Find the common flux at each face
     double flux_comm[(nelem+1)*(NSP+3)], uBack[NSP+3], omega[NSP]{};
@@ -293,7 +293,7 @@ void CalcRes(int nelem, double dx, double CFL, double pb, Chem &air, State* Elem
     PressureBC(pb, varL.p, air, uL, uBack);
     uR = uBack;
     varR.Initialize(uR);
-    varR.UpdateState(air);
+    varR.UpdateState(air, ireact);
 
     flux = &flux_comm[fIJ(nelem, 0)];
     LDFSS(Afa[nelem], uL, varL, uR, varR, air, flux);
@@ -313,25 +313,35 @@ void CalcRes(int nelem, double dx, double CFL, double pb, Chem &air, State* Elem
             int idk = id+kvar;
             res[idk] = -(flux_comm[uIJK(ielem+1,0,kvar)] - flux_comm[idk]) / dx;
         }
-
-        //Chemical source terms
-        if (var.Tstar > 1000) {
-            CalcOmega(ui, air, var, omega);
-            for (int isp = 0; isp < NSP; isp++) {
-                res[id + isp] += Acc[ielem] * omega[isp];
-            }
-        }
-
         //Pressure source term
         res[id+NSP] += var.p*(Afa[ielem+1] - Afa[ielem])/dx; // dAdx[ielem];
 
-        //Vib source term
-        tne_src=0.0;
-        for (int isp = 0; isp < NSP; isp++) {
-            if (var.taui[isp] <= 0.0) continue;
-            tne_src += ui[isp] * (var.evT[isp] - var.evTv[isp]) * var.taui[isp];
-        }
-        res[id+NSP+2] += Acc[ielem]*tne_src;
 
+        //Chemical source terms
+        if (ireact==1) {
+            if (var.Tstar > 1000.0) {
+                CalcOmega(ui, air, var, omega);
+                for (int isp = 0; isp < NSP; isp++) {
+                    res[id + isp] += Acc[ielem] * omega[isp];
+                }
+            } else {
+                for (int isp = 0; isp < NSP; isp++) { // NOLINT(modernize-loop-convert)
+                    omega[isp] = 0.0;
+                }
+            }
+            //Vib source term
+            tne_src = 0.0;
+            for (int isp = 0; isp < NSP; isp++) {
+                //vibrational nonequilibrium
+                if (var.taui[isp] >= 0.0) {
+                    tne_src += ui[isp] * (var.evT[isp] - var.evTv[isp]) * var.taui[isp];
+                }
+
+
+                tne_src += omega[isp] * var.evTv[isp];
+
+            }
+            res[id + NSP + 2] += Acc[ielem] * tne_src;
+        }
     }
 }

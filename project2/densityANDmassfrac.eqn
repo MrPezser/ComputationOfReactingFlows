@@ -1,0 +1,13 @@
+#!MC 1410
+$!AlterData 
+  Equation = '{rho} = {V2} +  {V3} +  {V4} +  {V5} +  {V6}'
+$!AlterData 
+  Equation = '{YN2} = {V2} / {rho}'
+$!AlterData 
+  Equation = '{YO2} = {V3} / {rho}'
+$!AlterData 
+  Equation = '{YNO} = {V4} / {rho}'
+$!AlterData 
+  Equation = '{YN} = {V5} / {rho}'
+$!AlterData 
+  Equation = '{YO} = {V6} / {rho}'

@@ -18,7 +18,7 @@ double area_slope(const double x){
 }
 
 void restart(int nelem, double* u){
-    FILE* frst = fopen("restart.dat","r"); //restart_therm_equlib.dat
+    FILE* frst = fopen("restart_therm_equlib.dat","r"); //restart_therm_equlib.dat | restart_good.dat
     if (frst==nullptr) {
         printf("No restart file found.\n");
         return;
@@ -37,13 +37,14 @@ void restart(int nelem, double* u){
 
 int main() {
     //Inputs
-    int nelem;
+    int nelem, ireact;
     double CFL;
     double pb_ratio, pb,p0{};
 
     nelem = 200;
-    CFL = 0.9;
+    CFL = 0.05;
     pb_ratio = 200;
+    ireact = 0;
 
     ///MAKE SURE THAT THERE IS CONSISTENCE AMONG THE INDEXING FOR DIFFEREENT FACE-VALUED VARIABLES/ARRAYS
     Chem air = Chem();
@@ -101,16 +102,16 @@ int main() {
     }
     pb = p0*pb_ratio;
 
-    //Calculate post shock conditions (approx Mach 9.33333 normal shock)
-    double rho_shock = 5.67322239;
+    //Calculate post shock conditions (approx Mach 9 normal shock)
+    double rho_shock = 5.0;
     u0back[0] = u0[0]*rho_shock;
     u0back[1] = u0[1]*rho_shock;
     u0back[2] = u0[2]*rho_shock;
     u0back[3] = u0[3]*rho_shock;
     u0back[4] = u0[4]*rho_shock;
-    u0back[5] = 616.56;
-    u0back[6] = u0[6] * 17.8217024;
-    u0back[7] = u0[7] * 17.8217024;
+    u0back[5] = u0[4]/rho_shock;
+    u0back[6] = u0[6] * 15.0;
+    u0back[7] = u0[7] * 15.0;
 
     //Intialize flow
     auto u = (double*)malloc(nelem*NDEGR*(NSP+3)*sizeof(double));
@@ -120,7 +121,7 @@ int main() {
             //u[uIJK(ielem,0,7)] = u[uIJK(ielem,0,6)];
             for (int kvar=0; kvar<(NSP+3); kvar++){
 
-                if (xfa[ielem]<0.85) {   //Freestream conditions
+                if (xfa[ielem]<1.10) {   //Freestream conditions
                     u[uIJK(ielem, jdegr, kvar)] = u0[kvar];
 
                 } else {                //Post-Shock conditions
@@ -131,20 +132,12 @@ int main() {
     }
     restart(nelem,u);
 
-    int save = solve_nonreacting(nelem, dx, CFL, pb, air, u0, u, xcc, Acc, Afa, dAdx);
+    int success = solve(ireact, nelem, dx, CFL, pb, air, u0, u, xcc, Acc, Afa, dAdx);
 
-    if (save==1) {
-        //print soln
-        FILE *fout = fopen("waveout.tec", "w");
-        fprintf(fout, "x\trhoN2\trhoO2\trhoNO\trhoN\trhoO\tu\tT\tTv\n");
 
-        for (int i = 0; i < nelem; i++) {
-            fprintf(fout, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", xcc[i],
-                    u[uIJK(i, 0, 0)], u[uIJK(i, 0, 1)], u[uIJK(i, 0, 2)], u[uIJK(i, 0, 3)], u[uIJK(i, 0, 4)],
-                    u[uIJK(i, 0, 5)],
-                    u[uIJK(i, 0, 6)], u[uIJK(i, 0, 7)], Acc[i], dAdx[i], xfa[i], Afa[i]);
-        }
-        fclose (fout);
+
+    if (!success){
+        printf("WRONG! Try again but don't code any bugs this time idiot...\n");
     }
 
     return 0;

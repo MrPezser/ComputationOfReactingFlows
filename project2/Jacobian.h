@@ -9,6 +9,6 @@
 #include "Indexing.h"
 #include "StateVariables.h"
 
-void BuildJacobian(double* unk, Chem &air, State& var, double** D);
+void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& var, double** D);
 
 #endif //PROJECT2_JACOBIAN_H

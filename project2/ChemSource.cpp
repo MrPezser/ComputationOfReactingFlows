@@ -30,9 +30,9 @@ double Calc_keq(double T, double alpha, const double* A){
 
 
 void CalcOmega(const double* unk, Chem& air, State& var, double* omega){
-    double rrtb, kf, keq, kb, T, Cf, eta, thetad, alpha, concF, concB, nu, rho_tilde[NSP];
+    double rrtb, kf, keq, kb, T, Cf, eta, thetad, alpha, concF, concB, rho_tilde[NSP];
     double* A;
-    int rxns, include;
+    int rxns, nu, include;
 
     T = var.Tstar;
     for (int isp=0; isp<NSP; isp++){
@@ -45,7 +45,7 @@ void CalcOmega(const double* unk, Chem& air, State& var, double* omega){
         if (air.itb[irx] == 1){
 
             for (int jsp=0; jsp<NSP; jsp++){
-                rrtb += unk[jsp] * air.tb[irx][jsp];
+                rrtb += rho_tilde[jsp] * air.tb[irx][jsp];  //unk[jsp]
             }
 
         } else {
@@ -61,19 +61,21 @@ void CalcOmega(const double* unk, Chem& air, State& var, double* omega){
         eta = air.eta[irx];
         thetad = air.thetad[irx];
         kf = Calc_kf(T,Cf,eta, thetad);
+        var.kf[irx] = kf;
 
         //find keq/kb
         alpha = air.alpham[irx];
         A = air.Arxn[irx];
         keq = Calc_keq(T, alpha, A);
         kb = kf/keq;
+        var.kb[irx] = kb;
 
         //calculate RR
         concF = 1.0;
         concB = 1.0;
         for(int jsp=0; jsp<NSP; jsp++){
-            nu = air.nu[irx][jsp];
-            for(int k=0; k<fabs(nu); k++){
+            nu = int(air.nu[irx][jsp]);
+            for(int k=0; k<abs(nu); k++){
 
                 if (nu < 0){
                     concF *= rho_tilde[jsp];
@@ -90,20 +92,30 @@ void CalcOmega(const double* unk, Chem& air, State& var, double* omega){
     for (int isp=0; isp<NSP; isp++){
         omega[isp]=0.0;
 
-        rxns = air.sprxn[isp];
+        //rxns = air.sprxn[isp];
         for (int jrx = 0; jrx < NRX; jrx++) {
-            include = (rxns >> jrx) & 1;  //read binary encoded val and det if rxn has contribution.
-            //idk why I did this to save a few flops, was probably just avoiding coding the jacobian...
+            //include = (rxns >> jrx) & 1;  //read binary encoded val and det if rxn has contribution.
+            //idk why I did this to save a few flops, was probably just bored...
 
-            if (include){
+
+            //if (include){
                 if (air.itb[jrx]){
-                    omega[isp] += var.RRlma[jrx]*rrtb;
+                    omega[isp] += air.Mw[isp]*air.nu[jrx][isp]*var.RRlma[jrx]*var.RRtb[jrx];
                 } else {
-                    omega[isp] += var.RRlma[jrx];
+                    omega[isp] += air.Mw[isp]*air.nu[jrx][isp]*var.RRlma[jrx];
                 }
-            }
+            //}
         }
-        omega[isp] *= air.Mw[isp];
     }
+
+    //check conservation
+    double omegasum, Osum, Nsum;
+    omegasum = 0.0;
+    for (int isp=0; isp<NSP;isp++) {
+        omegasum += omega[isp];
+    }
+    Osum = 2.0*omega[1]/air.Mw[1] + omega[2]/air.Mw[2] + omega[4]/air.Mw[4];
+    Nsum = 2.0*omega[0]/air.Mw[0] + omega[2]/air.Mw[2] + omega[3]/air.Mw[3];
+    if (omegasum+Osum+Nsum>1e-10) {printf("Chem Src not conserving mass!!!\n");}
 
 }

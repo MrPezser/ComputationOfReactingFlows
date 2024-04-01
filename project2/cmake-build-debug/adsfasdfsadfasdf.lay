@@ -1,6 +1,5 @@
 #!MC 1410
-$!VarSet |LFDSFN1| = '"waveout.tec"'
-$!VarSet |LFDSVL1| = '"V1" "V2" "V3" "V4" "V5" "V6" "V7" "V8" "V9"'
+$!VarSet |LFDSFN1| = '"untitled.plt"'
 $!SetStyleBase Factory
 $!GlobalPaper 
   PaperSizeInfo
@@ -41,23 +40,17 @@ $!ReadDataSet  '|LFDSFN1|'
   InitialPlotType = XYLine
   IncludeText = No
   IncludeGeom = No
-  ReadDataOption = Replace
-  ResetStyle = No
-  AssignStrandIDs = Yes
-  VarLoadMode = ByName
-  VarNameList = '|LFDSVL1|'
-$!RemoveVar |LFDSVL1|
 $!RemoveVar |LFDSFN1|
 $!FrameLayout 
   ShowHeader = No
   HeaderColor = Red
   XYPos
     {
-    X = 0.2125
-    Y = 0.2125
+    X = 1
+    Y = -2.3544
     }
-  Width = 10.575
-  Height = 3.9844
+  Width = 9
+  Height = 2.6208
 $!ThreeDAxis 
   AspectRatioLimit = 25
   BoxAspectRatioLimit = 25
@@ -66,7 +59,7 @@ $!FrameName  = 'Frame 001'
 $!GlobalTime 
   SolutionTime = 0
 $!DeleteLineMaps 
-$!ActiveLineMaps  =  [1-2]
+$!ActiveLineMaps  =  [1-5]
 $!GlobalLinePlot 
   DataLabels
     {
@@ -75,10 +68,18 @@ $!GlobalLinePlot
   Legend
     {
     Show = Yes
+    TextShape
+      {
+      Height = 5
+      }
+    Box
+      {
+      BoxType = Filled
+      }
     XYPos
       {
-      X = 75.613
-      Y = 71.27
+      X = 95.396
+      Y = 81.07
       }
     }
 $!LineMap  [1]
@@ -92,6 +93,7 @@ $!LineMap  [1]
   Lines
     {
     Color = Red
+    LineThickness = 0.8
     }
   Symbols
     {
@@ -118,6 +120,7 @@ $!LineMap  [2]
   Lines
     {
     Color = Green
+    LineThickness = 0.8
     }
   Symbols
     {
@@ -134,7 +137,7 @@ $!LineMap  [2]
     Color = Green
     }
 $!LineMap  [3]
-  Name = '&DV&'
+  Name = 'rhoNO'
   Assign
     {
     Zone = 1
@@ -144,6 +147,7 @@ $!LineMap  [3]
   Lines
     {
     Color = Blue
+    LineThickness = 0.8
     }
   Symbols
     {
@@ -160,7 +164,7 @@ $!LineMap  [3]
     Color = Blue
     }
 $!LineMap  [4]
-  Name = '&DV&'
+  Name = 'rhoN'
   Assign
     {
     Zone = 1
@@ -169,7 +173,8 @@ $!LineMap  [4]
     }
   Lines
     {
-    Color = Custom1
+    Color = Purple
+    LineThickness = 0.8
     }
   Symbols
     {
@@ -186,7 +191,7 @@ $!LineMap  [4]
     Color = Custom1
     }
 $!LineMap  [5]
-  Name = '&DV&'
+  Name = 'rhoO'
   Assign
     {
     Zone = 1
@@ -196,6 +201,7 @@ $!LineMap  [5]
   Lines
     {
     Color = Custom3
+    LineThickness = 0.8
     }
   Symbols
     {
@@ -293,21 +299,130 @@ $!XYLineAxis
   DepXToYRatio = 1
   ViewportPosition
     {
-    Y2 = 88
+    X1 = 15.935
+    Y1 = 13.596
+    X2 = 90.935
+    Y2 = 90.596
     }
+  ViewportTopSnapTarget = 90.5963325937
 $!XYLineAxis 
   XDetail 1
     {
-    RangeMin = -0.5
-    RangeMax = 2
-    GRSpacing = 0.5
+    RangeMin = 0.0037499999161809682846
+    RangeMax = 1.4963992833819472761
+    GRSpacing = 0.2
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 6
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    MinorGridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'X'
+      TextShape
+        {
+        Height = 6.6
+        }
+      }
+    }
+$!XYLineAxis 
+  XDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
     }
 $!XYLineAxis 
   YDetail 1
     {
-    RangeMin = -0.00050000000000000044409
-    RangeMax = 0.003499999999999993134
-    GRSpacing = 0.0005
+    RangeMin = -0.00050000000000000001041
+    RangeMax = 0.0060000000000000001249
+    GRSpacing = 0.001
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 5
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'kg/m^3'
+      TextShape
+        {
+        Height = 5.6
+        }
+      }
+    }
+$!XYLineAxis 
+  YDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!Linking 
+  BetweenFrames
+    {
+    LinkXAxisRange = Yes
     }
 ### Frame Number 2 ###
 $!CreateNewFrame 
@@ -316,11 +431,11 @@ $!FrameLayout
   HeaderColor = Red
   XYPos
     {
-    X = 0.2125
-    Y = 4.3031
+    X = 1.0107
+    Y = 0.27423
     }
-  Width = 10.575
-  Height = 3.9844
+  Width = 9
+  Height = 2.6208
 $!ThreeDAxis 
   AspectRatioLimit = 25
   BoxAspectRatioLimit = 25
@@ -338,10 +453,18 @@ $!GlobalLinePlot
   Legend
     {
     Show = Yes
+    TextShape
+      {
+      Height = 5
+      }
+    Box
+      {
+      BoxType = Filled
+      }
     XYPos
       {
-      X = 83.223
-      Y = 63.568
+      X = 99.509
+      Y = 98.546
       }
     }
 $!LineMap  [1]
@@ -355,6 +478,7 @@ $!LineMap  [1]
   Lines
     {
     Color = Red
+    LineThickness = 0.8
     }
   Symbols
     {
@@ -381,6 +505,7 @@ $!LineMap  [2]
   Lines
     {
     Color = Green
+    LineThickness = 0.8
     }
   Symbols
     {
@@ -407,6 +532,7 @@ $!LineMap  [3]
   Lines
     {
     Color = Blue
+    LineThickness = 0.8
     }
   Symbols
     {
@@ -424,20 +550,828 @@ $!LineMap  [3]
     }
 $!XYLineAxis 
   DepXToYRatio = 1
+  ViewportPosition
+    {
+    X1 = 15.935
+    X2 = 90.935
+    }
 $!XYLineAxis 
   XDetail 1
     {
-    RangeMin = -0.20000000000000017764
-    RangeMax = 1.6000000000000000888
+    RangeMin = 0.0037499999161809682846
+    RangeMax = 1.4963992833819472761
     GRSpacing = 0.2
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 6
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    MinorGridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'X'
+      TextShape
+        {
+        Height = 6.6
+        }
+      }
+    }
+$!XYLineAxis 
+  XDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
     }
 $!XYLineAxis 
   YDetail 1
     {
     RangeMin = 0
-    RangeMax = 6500
-    GRSpacing = 500
+    RangeMax = 6000
+    GRSpacing = 1000
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 5
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'K or m/s'
+      TextShape
+        {
+        Height = 6.6
+        }
+      }
+    }
+$!XYLineAxis 
+  YDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!Linking 
+  BetweenFrames
+    {
+    LinkXAxisRange = Yes
+    }
+### Frame Number 3 ###
+$!CreateNewFrame 
+$!FrameLayout 
+  ShowHeader = No
+  HeaderColor = Red
+  XYPos
+    {
+    X = 1
+    Y = 2.9175
+    }
+  Width = 9
+  Height = 2.6208
+$!ThreeDAxis 
+  AspectRatioLimit = 25
+  BoxAspectRatioLimit = 25
+$!PlotType  = XYLine
+$!FrameName  = 'Frame 003'
+$!GlobalTime 
+  SolutionTime = 0
+$!DeleteLineMaps 
+$!ActiveLineMaps  =  [1-5]
+$!GlobalLinePlot 
+  DataLabels
+    {
+    DistanceSkip = 5
+    }
+  Legend
+    {
+    Show = Yes
+    TextShape
+      {
+      Height = 5
+      }
+    Box
+      {
+      BoxType = Filled
+      }
+    XYPos
+      {
+      X = 98.107
+      Y = 66.675
+      }
+    }
+$!LineMap  [1]
+  Name = '&DV&'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 12
+    }
+  Lines
+    {
+    Color = Red
+    LineThickness = 0.8
+    }
+  Symbols
+    {
+    Color = Yellow
+    FillColor = Yellow
+    }
+  BarCharts
+    {
+    Color = Yellow
+    FillColor = Yellow
+    }
+  ErrorBars
+    {
+    Color = Yellow
+    }
+$!LineMap  [2]
+  Name = '&DV&'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 13
+    }
+  Lines
+    {
+    Color = Green
+    LineThickness = 0.8
+    }
+  Symbols
+    {
+    Color = Purple
+    FillColor = Purple
+    }
+  BarCharts
+    {
+    Color = Purple
+    FillColor = Purple
+    }
+  ErrorBars
+    {
+    Color = Purple
+    }
+$!LineMap  [3]
+  Name = 'YNO'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 14
+    }
+  Lines
+    {
+    Color = Blue
+    LineThickness = 0.8
+    }
+  Symbols
+    {
+    Color = Blue
+    FillColor = Blue
+    }
+  BarCharts
+    {
+    Color = Blue
+    FillColor = Blue
+    }
+  ErrorBars
+    {
+    Color = Blue
+    }
+$!LineMap  [4]
+  Name = 'YN'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 15
+    }
+  Lines
+    {
+    Color = Purple
+    LineThickness = 0.8
+    }
+  Symbols
+    {
+    Color = Custom1
+    FillColor = Custom1
+    }
+  BarCharts
+    {
+    Color = Custom1
+    FillColor = Custom1
+    }
+  ErrorBars
+    {
+    Color = Custom1
+    }
+$!LineMap  [5]
+  Name = 'YO'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 16
+    }
+  Lines
+    {
+    Color = Custom3
+    LineThickness = 0.8
+    }
+  Symbols
+    {
+    Color = Custom3
+    FillColor = Custom3
+    }
+  BarCharts
+    {
+    Color = Custom3
+    FillColor = Custom3
+    }
+  ErrorBars
+    {
+    Color = Custom3
+    }
+$!XYLineAxis 
+  DepXToYRatio = 1
+  ViewportPosition
+    {
+    X1 = 15.935
+    X2 = 90.935
+    }
+$!XYLineAxis 
+  XDetail 1
+    {
+    RangeMin = 0.0037499999161809682846
+    RangeMax = 1.4963992833819472761
+    GRSpacing = 0.2
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 6
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    MinorGridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'X'
+      TextShape
+        {
+        Height = 6.6
+        }
+      }
+    }
+$!XYLineAxis 
+  XDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 1
+    {
+    RangeMin = -0.050000000000000002776
+    RangeMax = 1
+    GRSpacing = 0.2
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 6
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'Y'
+      TextShape
+        {
+        Height = 7.6
+        }
+      }
+    }
+$!XYLineAxis 
+  YDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!Linking 
+  BetweenFrames
+    {
+    LinkXAxisRange = Yes
+    }
+### Frame Number 4 ###
+$!CreateNewFrame 
+$!FrameLayout 
+  ShowHeader = No
+  HeaderColor = Red
+  XYPos
+    {
+    X = 1.0107
+    Y = 5.5441
+    }
+  Width = 8.9893
+  Height = 2.6
+$!ThreeDAxis 
+  AspectRatioLimit = 25
+  BoxAspectRatioLimit = 25
+$!PlotType  = XYLine
+$!FrameName  = 'Frame 004'
+$!GlobalTime 
+  SolutionTime = 0
+$!DeleteLineMaps 
+$!ActiveLineMaps  =  [1]
+$!GlobalLinePlot 
+  DataLabels
+    {
+    DistanceSkip = 5
+    }
+  Legend
+    {
+    Show = Yes
+    TextShape
+      {
+      Height = 5
+      }
+    Box
+      {
+      BoxType = Filled
+      }
+    XYPos
+      {
+      X = 99.035
+      Y = 78.883
+      }
+    }
+$!LineMap  [1]
+  Name = 'P'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 10
+    }
+  Lines
+    {
+    Color = Red
+    LineThickness = 1.5
+    }
+  Symbols
+    {
+    Color = Red
+    FillColor = Red
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!XYLineAxis 
+  DepXToYRatio = 1
+  ViewportPosition
+    {
+    X1 = 15.935
+    X2 = 90.935
+    }
+$!XYLineAxis 
+  XDetail 1
+    {
+    RangeMin = 0.0037499999161809682846
+    RangeMax = 1.4963992833819472761
+    GRSpacing = 0.2
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 6
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    MinorGridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'X'
+      TextShape
+        {
+        Height = 6.6
+        }
+      }
+    }
+$!XYLineAxis 
+  XDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 1
+    {
+    RangeMin = 0
+    RangeMax = 8000
+    AutoGrid = No
+    GRSpacing = 1000
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 5
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'Pa'
+      TextShape
+        {
+        Height = 6.6
+        }
+      }
+    }
+$!XYLineAxis 
+  YDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!Linking 
+  BetweenFrames
+    {
+    LinkXAxisRange = Yes
+    }
+### Frame Number 5 ###
+$!CreateNewFrame 
+$!FrameLayout 
+  ShowHeader = No
+  HeaderColor = Red
+  XYPos
+    {
+    X = 1.0213
+    Y = 8.1536
+    }
+  Width = 8.968
+  Height = 2.4604
+$!ThreeDAxis 
+  AspectRatioLimit = 25
+  BoxAspectRatioLimit = 25
+$!PlotType  = XYLine
+$!FrameName  = 'Frame 005'
+$!GlobalTime 
+  SolutionTime = 0
+$!DeleteLineMaps 
+$!ActiveLineMaps  =  [1]
+$!GlobalLinePlot 
+  DataLabels
+    {
+    DistanceSkip = 5
+    }
+  Legend
+    {
+    Show = Yes
+    TextShape
+      {
+      Height = 5
+      }
+    Box
+      {
+      BoxType = Filled
+      }
+    XYPos
+      {
+      X = 99.628
+      Y = 87.723
+      }
+    }
+$!LineMap  [1]
+  Name = 'Mach'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 11
+    }
+  Lines
+    {
+    Color = Red
+    LineThickness = 1.5
+    }
+  Symbols
+    {
+    Color = Red
+    FillColor = Red
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!XYLineAxis 
+  DepXToYRatio = 1
+  ViewportPosition
+    {
+    X1 = 15.935
+    X2 = 90.935
+    }
+$!XYLineAxis 
+  XDetail 1
+    {
+    RangeMin = 0.0037499999161809682846
+    RangeMax = 1.4963992833819472761
+    GRSpacing = 0.2
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 6
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    MinorGridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'X'
+      TextShape
+        {
+        Height = 6.6
+        }
+      }
+    }
+$!XYLineAxis 
+  XDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  XDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 1
+    {
+    RangeMin = 0
+    RangeMax = 10
+    GRSpacing = 2
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 5
+        }
+      }
+    Gridlines
+      {
+      Show = Yes
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'Mach Number'
+      TextShape
+        {
+        Height = 6.6
+        }
+      }
+    }
+$!XYLineAxis 
+  YDetail 2
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 3
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 4
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!XYLineAxis 
+  YDetail 5
+    {
+    RangeMin = 0
+    RangeMax = 1
+    GRSpacing = 0.1
+    }
+$!Linking 
+  BetweenFrames
+    {
+    LinkXAxisRange = Yes
+    LinkYAxisRange = Yes
     }
 $!FrameControl ActivateByNumber
-  Frame = 2
+  Frame = 5
 $!SetStyleBase Config

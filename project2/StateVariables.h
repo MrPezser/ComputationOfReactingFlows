@@ -16,7 +16,7 @@ private:
 
 public:
     double p{},cptr[NSP]{},rho_mix{},rhoR{},rhoCv{},rhoCp{},a{},h0{},hv{},taui[NSP]{},evT[NSP]{},evTv[NSP]{},etr[NSP]{},
-            htr[NSP]{}, cpvT[NSP]{}, cpvTv[NSP]{}, Tstar{}, RRtb[NRX]{}, RRlma[NRX]{};
+            htr[NSP]{}, cpvT[NSP]{}, cpvTv[NSP]{}, Tstar{}, RRtb[NRX]{}, RRlma[NRX]{}, kf[NRX]{}, kb[NRX]{};
 
     State() = default;
 
@@ -24,8 +24,9 @@ public:
         unk = u;
     }
 
-    void UpdateState(Chem& air) {
+    void UpdateState(Chem& air, int ireact) {
         p=0;
+
 
         rhoR = 0.0;
         rhoCv = 0.0;
@@ -37,23 +38,39 @@ public:
         for (int isp=0.0; isp<NSP; isp++){
             rho_mix   += unk[isp];
         }
-        for (int isp=0; isp<NSP; isp++){
-            cptr[isp] = air.Get_cptr(isp, unk[NSP+1]);
 
-            rhoR  += unk[isp]*air.Ruv/air.Mw[isp];
-            rhoCv += unk[isp]*(cptr[isp] - air.Ruv/air.Mw[isp]);
-            rhoCp += unk[isp]*(cptr[isp]);
-            h0 += unk[isp] * air.Get_htotal(isp,unk[NSP+1],unk[NSP+2])/rho_mix;
-            hv += unk[isp] * air.Get_hv(isp,unk[NSP+1],unk[NSP+2]) / rho_mix;   //Mixture Vibrational Enthalpy
+        if (ireact==1) {
+            //full tc noneq
+            for (int isp = 0; isp < NSP; isp++) {
+                cptr[isp] = air.Get_cptr(isp, unk[NSP + 1]);
+
+                rhoR += unk[isp] * air.Ruv / air.Mw[isp];
+                rhoCv += unk[isp] * (cptr[isp] - air.Ruv / air.Mw[isp]);
+                rhoCp += unk[isp] * (cptr[isp]);
+                h0 += unk[isp] * air.Get_htotal(isp, unk[NSP + 1], unk[NSP + 2]) / rho_mix;
+                hv += unk[isp] * air.Get_hv(isp, unk[NSP + 1], unk[NSP + 2]) / rho_mix;   //Mixture Vibrational Enthalpy
+            }
+            Tstar = sqrt(unk[NSP+1]*unk[NSP+2]);
+        } else {
+            //themochemical equilibrium
+            for (int isp = 0; isp < NSP; isp++) {
+                cptr[isp] = air.Calc_cp_Curve(isp, unk[NSP + 1]);
+
+                rhoR += unk[isp] * air.Ruv / air.Mw[isp];
+                rhoCv += unk[isp] * (cptr[isp] - air.Ruv / air.Mw[isp]);
+                rhoCp += unk[isp] * (cptr[isp]);
+                h0 += unk[isp] * air.Calc_h_Curve(isp, unk[NSP + 1]) / rho_mix;
+                hv += 0.0;
+            }
+            Tstar = unk[NSP+1];
         }
         h0 +=  0.5*unk[NSP]*unk[NSP];                       //Mixture Total Enthaply
         p = rhoR*unk[NSP+1];                                //Presure
         a = sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));        //Wavespeed
 
-        Tstar = sqrt(unk[NSP+1]*unk[NSP+2]);
+        CalcEnergies(air, ireact);
 
-        CalcRlxTime(air);
-        CalcEnergies(air);
+        if (ireact==1){CalcRlxTime(air);}
     }
 
     void CalcRlxTime(Chem& air){
@@ -98,19 +115,33 @@ public:
             }
     }
 
-    void CalcEnergies(Chem& air) {
+    void CalcEnergies(Chem& air, int ireact) {
         double T, Tv;
-
-        //Vibration energy at Ttr and Tve
-        T = unk[NSP + 1];
-        Tv = unk[NSP + 2];
-        for (int isp = 0; isp < NSP; isp++) {
-            evT[isp]  = air.Get_hv(isp, T, T);
-            evTv[isp] = air.Get_hv(isp, T, Tv);
-            htr[isp] = air.Get_htr(isp,unk[NSP+1]);
-            etr[isp] = htr[isp] - air.Rs[isp]*unk[NSP+1];
-            cpvT[isp] = air.Get_cpv(isp,unk[NSP+1], unk[NSP+1]);
-            cpvTv[isp] = air.Get_cpv(isp,unk[NSP+1], unk[NSP+2]);
+        if (ireact==1) {
+            //Vibration energy at Ttr and Tve
+            T = unk[NSP + 1];
+            Tv = unk[NSP + 2];
+            for (int isp = 0; isp < NSP; isp++) {
+                evT[isp] = air.Get_hv(isp, T, T);
+                evTv[isp] = air.Get_hv(isp, T, Tv);
+                htr[isp] = air.Get_htr(isp, T);
+                etr[isp] = htr[isp] - air.Rs[isp] * T;
+                cpvT[isp] = air.Get_cpv(isp, T, T);
+                cpvTv[isp] = air.Get_cpv(isp, T, Tv);
+            }
+            return;
+        } else {
+            //Vibration energy at Ttr and Tve
+            T = unk[NSP + 1];
+            for (int isp = 0; isp < NSP; isp++) {
+                evT[isp] = 0.0;
+                evTv[isp] = 0.0;
+                htr[isp] = air.Calc_h_Curve(isp, T);
+                etr[isp] = htr[isp] - air.Rs[isp] * T;
+                cpvT[isp] = 0.0;
+                cpvTv[isp] = 0.0;
+            }
+            return;
         }
     }
 

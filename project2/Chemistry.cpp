@@ -57,6 +57,8 @@ double Chem::Calc_cp_Curve(int isp, double T) {
 
 //Translational Thermo
 double Chem::Get_cptr(int isp, double T){
+    //if (isp>=3) return Calc_cp_Curve(isp,T);
+
     if (T > 1000.0) {
         return (Rs[isp]) * (Ah[isp]);
     }else{
@@ -64,6 +66,8 @@ double Chem::Get_cptr(int isp, double T){
     }
 }
 double Chem::Get_htr(int isp, double T){
+    //if (isp>=3) return Calc_h_Curve(isp,T);
+
     if (T > 1000.0) {
         return (Rs[isp]) * (Ah[isp]*(T) + Fh[isp]);
     } else {
@@ -73,7 +77,7 @@ double Chem::Get_htr(int isp, double T){
 
 //Vibrational Thermo
 double Chem::Get_hv(int isp, double T, double Tv) {
-//    if (isp>=3) return 0.0;
+    //if (isp>=3) return 0.0;
 
     double cptr, hv, h_f;
     cptr = Get_cptr(isp, T);
@@ -89,7 +93,8 @@ double Chem::Get_hv(int isp, double T, double Tv) {
     return hv;
 }
 double Chem::Get_cpv(int isp, double T, double Tv) {
-//    if (isp>=3) return 0.0;
+    //if (isp>=3) return 0.0;
+
     double cptr, cpv;
     cptr = Get_cptr(isp, T);
     cpv = Calc_cp_Curve(isp, Tv);
@@ -185,11 +190,11 @@ void Chem::InitializeChemistry(){
     tb[2][3] = 2.0;
     tb[2][4] = 2.0;
 
-    alpham[0] = 1000;
-    alpham[1] = 1000;
-    alpham[2] = 1000;
-    alpham[3] = 1;
-    alpham[4] = 1;
+    alpham[0] = 1000.0;
+    alpham[1] = 1000.0;
+    alpham[2] = 1000.0;
+    alpham[3] = 1.0;
+    alpham[4] = 1.0;
 
     //[reaction][coeff #]
     Arxn[0][0] = 1.335;

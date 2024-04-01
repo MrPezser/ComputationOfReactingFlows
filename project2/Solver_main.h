@@ -8,7 +8,7 @@
 #include "Chemistry.h"
 
 
-int solve_nonreacting(int nelem, double dx, double CFL, double pb, Chem &air, double* u0, double* u, double* xcc,
+int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, double* u0, double* u, double* xcc,
                       const double* Acc,const double* Afa,const double* dAdx);
 
 #endif //PROJECT2_SOLVER_MAIN_H
