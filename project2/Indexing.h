@@ -17,7 +17,7 @@
 #define MXITER 1e7
 #define RESTOL 1e-6 //residual drop to decare convergence
 #define RXTOL 1e-3 //residual drop to activate thermochemical source terms
-
+#define CFLTCNE 0.25 //Thermochem CFL factor, need lower timestep to accomodate nonequilibrium effects
 #define IDETAIL 1 //printout more detailed residual
 
 #define ASSERT(cond, msg) if(!(cond)){printf("Failed Assert: %s:%u %s\n %s\n", __FILE__, __LINE__, #cond, msg); exit(0);}

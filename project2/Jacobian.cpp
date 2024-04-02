@@ -45,7 +45,7 @@ void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& v
         D[NSP+2][NSP+2] += dti * unk[isp]*var.cpvTv[isp];
 
         //other vib contributions
-        D[NSP+1][isp] += var.evTv[isp];
+        D[NSP+1][isp] += dti * var.evTv[isp];
         D[NSP+1][NSP+2] += dti * unk[isp]*var.cpvTv[isp];
 
 
@@ -69,39 +69,39 @@ void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& v
 
         irx = 0;
         dRdrho[irx][0] = var.RRlma[irx] * air.tb[irx][0] / air.Mw[0];
-        dRdrho[irx][1] = (var.kf[irx] / air.Mw[1]) * var.RRtb[irx] + var.RRlma[irx] * (air.tb[irx][1] / air.Mw[1]);
-        dRdrho[irx][2] = var.RRlma[irx] * air.tb[irx][2] / air.Mw[2];
-        dRdrho[irx][3] = var.RRlma[irx] * air.tb[irx][3] / air.Mw[3];
-        dRdrho[irx][4] = -2.0 * var.kb[irx] * rho_tilde[4] / air.Mw[4] + var.RRlma[irx] * air.tb[irx][4] / air.Mw[4];
+        //dRdrho[irx][1] = (var.kf[irx] / air.Mw[1]) * var.RRtb[irx] + var.RRlma[irx] * (air.tb[irx][1] / air.Mw[1]);
+        //dRdrho[irx][2] = var.RRlma[irx] * air.tb[irx][2] / air.Mw[2];
+        //dRdrho[irx][3] = var.RRlma[irx] * air.tb[irx][3] / air.Mw[3];
+        //dRdrho[irx][4] = -2.0 * var.kb[irx] * rho_tilde[4] / air.Mw[4] + var.RRlma[irx] * air.tb[irx][4] / air.Mw[4];
 
         irx = 1;
-        dRdrho[irx][0] = (var.kf[irx] / air.Mw[0]) * var.RRtb[irx] + var.RRlma[irx] * (air.tb[irx][0] / air.Mw[0]);
+        //dRdrho[irx][0] = (var.kf[irx] / air.Mw[0]) * var.RRtb[irx] + var.RRlma[irx] * (air.tb[irx][0] / air.Mw[0]);
         dRdrho[irx][1] = var.RRlma[irx] * air.tb[irx][1] / air.Mw[1];
-        dRdrho[irx][2] = var.RRlma[irx] * air.tb[irx][2] / air.Mw[2];
-        dRdrho[irx][3] = -2.0 * var.kb[irx] * rho_tilde[3] / air.Mw[3] + var.RRlma[irx] * air.tb[irx][3] / air.Mw[3];
-        dRdrho[irx][4] = var.RRlma[irx] * air.tb[irx][4] / air.Mw[4];
+        //dRdrho[irx][2] = var.RRlma[irx] * air.tb[irx][2] / air.Mw[2];
+        //dRdrho[irx][3] = -2.0 * var.kb[irx] * rho_tilde[3] / air.Mw[3] + var.RRlma[irx] * air.tb[irx][3] / air.Mw[3];
+        //dRdrho[irx][4] = var.RRlma[irx] * air.tb[irx][4] / air.Mw[4];
 
         irx = 2;
-        dRdrho[irx][0] = var.RRlma[irx] * air.tb[irx][0] / air.Mw[0];
-        dRdrho[irx][1] = var.RRlma[irx] * air.tb[irx][1] / air.Mw[1];
+        //dRdrho[irx][0] = var.RRlma[irx] * air.tb[irx][0] / air.Mw[0];
+        //dRdrho[irx][1] = var.RRlma[irx] * air.tb[irx][1] / air.Mw[1];
         dRdrho[irx][2] = (var.kf[irx] / air.Mw[2]) * var.RRtb[irx] + var.RRlma[irx] * air.tb[irx][2] / air.Mw[2];
-        dRdrho[irx][3] =
+        //dRdrho[irx][3] =
                 -(var.kb[irx] * rho_tilde[4] / air.Mw[3]) * var.RRtb[irx] + var.RRlma[irx] * air.tb[irx][3] / air.Mw[3];
-        dRdrho[irx][4] =
+        //dRdrho[irx][4] =
                 -(var.kb[irx] * rho_tilde[3] / air.Mw[4]) * var.RRtb[irx] + var.RRlma[irx] * air.tb[irx][4] / air.Mw[4];
 
         irx = 3;
-        dRdrho[irx][0] = var.kf[irx] * rho_tilde[4] / air.Mw[0];
-        dRdrho[irx][1] = 0.0;
-        dRdrho[irx][2] = -var.kb[irx] * rho_tilde[3] / air.Mw[2];
+        //dRdrho[irx][0] = var.kf[irx] * rho_tilde[4] / air.Mw[0];
+        //dRdrho[irx][1] = 0.0;
+        //dRdrho[irx][2] = -var.kb[irx] * rho_tilde[3] / air.Mw[2];
         dRdrho[irx][3] = -var.kb[irx] * rho_tilde[2] / air.Mw[3];
-        dRdrho[irx][4] = var.kf[irx] * rho_tilde[0] / air.Mw[4];
+        //dRdrho[irx][4] = var.kf[irx] * rho_tilde[0] / air.Mw[4];
 
         irx = 4;
-        dRdrho[irx][0] = 0.0;
-        dRdrho[irx][1] = -var.kb[irx] * rho_tilde[3] / air.Mw[1];
-        dRdrho[irx][2] = var.kf[irx] * rho_tilde[4] / air.Mw[2];
-        dRdrho[irx][3] = -var.kb[irx] * rho_tilde[1] / air.Mw[3];
+        //dRdrho[irx][0] = 0.0;
+        //dRdrho[irx][1] = -var.kb[irx] * rho_tilde[3] / air.Mw[1];
+        //dRdrho[irx][2] = var.kf[irx] * rho_tilde[4] / air.Mw[2];
+        //dRdrho[irx][3] = -var.kb[irx] * rho_tilde[1] / air.Mw[3];
         dRdrho[irx][4] = var.kf[irx] * rho_tilde[2] / air.Mw[4];
         // 0,N2     1,O2    2,NO    3,N     4,O
 
@@ -127,10 +127,7 @@ void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& v
 
     for (int i=0; i<NSP+3; i++){
         for (int j=0; j<NSP+3; j++){
-            if (_isnan(D[i][j])){
-                printf("stop here");
-            }
-            ASSERT(!_isnan(D[i][j]), "Not a Number jacobian value")
+            ASSERT(!_isnan(D[i][j]), "NaN Jacobian")
         }
     }
 

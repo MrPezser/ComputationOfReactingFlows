@@ -28,7 +28,7 @@ void ResNorm(int nelem, const double* res, double* resout) {
 }
 
 
-int IterUpdate(int& ireact, int iter, int nelem, const double* res, double* res0){
+int IterUpdate(int& ireact, int iter, int nelem,double& CFL, const double* res, double* res0){
     printf("Iter:%8d",iter);
 
     double ressum[NSP+3]{0.0}, resnorm{0.0};
@@ -66,6 +66,7 @@ int IterUpdate(int& ireact, int iter, int nelem, const double* res, double* res0
     } else{
         if (resnorm < RXTOL && ireact==0) {
             ireact = 1;
+            CFL = CFL*CFLTCNE;
             printf("ENABLING THERMOCHEMICAL SOURCE TERMS\n");
         }
         return 0;
@@ -156,9 +157,9 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
 
             //temperature limiting
             ui[NSP+2] = fmax(ui[NSP+2], 201);
-            ui[NSP+1] = fmax(ui[NSP+1], 201);
+            //ui[NSP+1] = fmax(ui[NSP+1], 201);
 
-            ui[NSP+2] = fmin(ui[NSP+2], 9500);
+            //ui[NSP+2] = fmin(ui[NSP+2], 9500);
             ui[NSP+1] = fmin(ui[NSP+1], 9500);
 
             //frozen thermo
@@ -170,7 +171,7 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
 
 
         if (iter%1000 ==0) {
-            iconv = IterUpdate(ireact, iter, nelem, res, res0);
+            iconv = IterUpdate(ireact, iter, nelem, CFL, res, res0);
 
 
             //save soln file

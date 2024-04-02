@@ -57,7 +57,7 @@ public:
                 cptr[isp] = air.Calc_cp_Curve(isp, unk[NSP + 1]);
 
                 rhoR += unk[isp] * air.Ruv / air.Mw[isp];
-                rhoCv += unk[isp] * (cptr[isp] - air.Ruv / air.Mw[isp]);
+                rhoCv += unk[isp] * (cptr[isp] - air.Rs[isp]);
                 rhoCp += unk[isp] * (cptr[isp]);
                 h0 += unk[isp] * air.Calc_h_Curve(isp, unk[NSP + 1]) / rho_mix;
                 hv += 0.0;

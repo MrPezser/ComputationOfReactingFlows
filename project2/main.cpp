@@ -42,7 +42,7 @@ int main() {
     double pb_ratio, pb,p0{};
 
     nelem = 200;
-    CFL = 0.01;
+    CFL = 0.4;    // will be reduced by multiplication with CFLTCNE when source terms are enabled
     pb_ratio = 200.0;
     ireact = 0;
 
@@ -51,7 +51,7 @@ int main() {
     double vel0, rho0, T0, YN20, YNO0, YO0, YN0, YO20;
     //Initial state as given
     vel0 = 3500.0;
-    rho0 = 25.0 * 3.074e-4;
+    rho0 = 1.0 * 3.074e-4;
     T0 = 350;
     YN20 = 0.7643;
     YNO0 = 0.0;
@@ -121,7 +121,7 @@ int main() {
             //u[uIJK(ielem,0,7)] = u[uIJK(ielem,0,6)];
             for (int kvar=0; kvar<(NSP+3); kvar++){
 
-                if (xfa[ielem]<0.80) {   //Freestream conditions
+                if (xfa[ielem]<0.50) {   //Freestream conditions
                     u[uIJK(ielem, jdegr, kvar)] = u0[kvar];
 
                 } else {                //Post-Shock conditions

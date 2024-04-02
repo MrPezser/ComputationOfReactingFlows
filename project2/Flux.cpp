@@ -72,8 +72,8 @@ c --------------------------------------------------------------------
     double xmcm = xmc * fmax(0.0,(1.0 + (delp/psum - 2.0*fabs(delp)/varR.p)));
     double cvlp = all*(1.0+btl)*xml - btl*xmml;
     double cvlm = alr*(1.0+btr)*xmr - btr*xmmr;
-    double cep = cvlp - xmcp;
-    double cem = cvlm + xmcm;
+    double cep = cvlp;// - xmcp;
+    double cem = cvlm;// + xmcm;
 
     double fml = A*varL.rho_mix*ahalf*cep;
     double fmr = A*varR.rho_mix*ahalf*cem;
