@@ -8,7 +8,7 @@
 
 #include "Solver_main.h"
 #include "Indexing.h"
-#include "Flux.h"
+#include "RHS.h"
 #include "Jacobian.h"
 #include "LinearSolve.h"
 #include "StateVariables.h"
@@ -67,6 +67,7 @@ int IterUpdate(int& ireact, int iter, int nelem,double& CFL, const double* res, 
         if (resnorm < RXTOL && ireact==0) {
             ireact = 1;
             CFL = CFL*CFLTCNE;
+            //return 1;///ONLY DO FULLY FROZEN FLOW
             printf("ENABLING THERMOCHEMICAL SOURCE TERMS\n");
         }
         return 0;
@@ -145,7 +146,7 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
 
 
 
-        //Carry out Euler Timestep
+        //Carry out Timestep
         for (int ielem=0; ielem<nelem; ielem++){
             double* ui = &(u[uIJK(ielem,0,0)]);
 

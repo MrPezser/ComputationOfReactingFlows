@@ -121,7 +121,7 @@ int main() {
             //u[uIJK(ielem,0,7)] = u[uIJK(ielem,0,6)];
             for (int kvar=0; kvar<(NSP+3); kvar++){
 
-                if (xfa[ielem]<0.50) {   //Freestream conditions
+                if (xfa[ielem]<0.8) {   //Freestream conditions
                     u[uIJK(ielem, jdegr, kvar)] = u0[kvar];
 
                 } else {                //Post-Shock conditions

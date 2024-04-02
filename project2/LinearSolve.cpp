@@ -85,39 +85,4 @@ void LUPSolve(double **A, int *P, double *b, int N, double *x) {
     }
 }
 
-/* INPUT: A,P filled in LUPDecompose; N - dimension
- * OUTPUT: IA is the inverse of the initial matrix
- */
-void LUPInvert(double **A, int *P, int N, double **IA) {
-
-    for (int j = 0; j < N; j++) {
-        for (int i = 0; i < N; i++) {
-            IA[i][j] = P[i] == j ? 1.0 : 0.0;
-
-            for (int k = 0; k < i; k++)
-                IA[i][j] -= A[i][k] * IA[k][j];
-        }
-
-        for (int i = N - 1; i >= 0; i--) {
-            for (int k = i + 1; k < N; k++)
-                IA[i][j] -= A[i][k] * IA[k][j];
-
-            IA[i][j] /= A[i][i];
-        }
-    }
-}
-
-/* INPUT: A,P filled in LUPDecompose; N - dimension.
- * OUTPUT: Function returns the determinant of the initial matrix
- */
-double LUPDeterminant(double **A, int *P, int N) {
-
-    double det = A[0][0];
-
-    for (int i = 1; i < N; i++)
-        det *= A[i][i];
-
-    return (P[N] - N) % 2 == 0 ? det : -det;
-}
-
 ///END CODE OBTAINED FROM WIKEPEDIA TO IMPLIMENT LU FACTORIZATION AND SYSTEM SOLVE

@@ -1,5 +1,6 @@
 #!MC 1410
-$!VarSet |LFDSFN1| = '"untitled.plt"'
+$!VarSet |LFDSFN1| = '"waveout.tec"'
+$!VarSet |LFDSVL1| = '"X" "rhoN2" "rhoO2" "rhoNO" "rhoN" "rhoO" "u" "T" "Tv" "P" "M" "YN2" "YO2" "YNO" "YN" "YO"'
 $!SetStyleBase Factory
 $!GlobalPaper 
   PaperSizeInfo
@@ -40,6 +41,12 @@ $!ReadDataSet  '|LFDSFN1|'
   InitialPlotType = XYLine
   IncludeText = No
   IncludeGeom = No
+  ReadDataOption = Replace
+  ResetStyle = No
+  AssignStrandIDs = Yes
+  VarLoadMode = ByName
+  VarNameList = '|LFDSVL1|'
+$!RemoveVar |LFDSVL1|
 $!RemoveVar |LFDSFN1|
 $!FrameLayout 
   ShowHeader = No
@@ -463,8 +470,8 @@ $!GlobalLinePlot
       }
     XYPos
       {
-      X = 99.509
-      Y = 98.546
+      X = 98.146
+      Y = 58.23
       }
     }
 $!LineMap  [1]
@@ -554,6 +561,7 @@ $!XYLineAxis
     {
     X1 = 15.935
     X2 = 90.935
+    Y2 = 88
     }
 $!XYLineAxis 
   XDetail 1
@@ -579,11 +587,12 @@ $!XYLineAxis
     Title
       {
       TitleMode = UseText
-      Text = 'X'
+      Text = 'X(m)'
       TextShape
         {
         Height = 6.6
         }
+      PercentAlongLine = 46
       }
     }
 $!XYLineAxis 
@@ -617,8 +626,8 @@ $!XYLineAxis
 $!XYLineAxis 
   YDetail 1
     {
-    RangeMin = 0
-    RangeMax = 6000
+    RangeMin = -1000
+    RangeMax = 7000
     GRSpacing = 1000
     TickLabel
       {
@@ -634,7 +643,7 @@ $!XYLineAxis
     Title
       {
       TitleMode = UseText
-      Text = 'K or m/s'
+      Text = 'K,  m/s'
       TextShape
         {
         Height = 6.6
@@ -921,8 +930,8 @@ $!XYLineAxis
 $!XYLineAxis 
   YDetail 1
     {
-    RangeMin = -0.050000000000000002776
-    RangeMax = 1
+    RangeMin = 0
+    RangeMax = 0.76437641874551776056
     GRSpacing = 0.2
     TickLabel
       {
@@ -1373,5 +1382,5 @@ $!Linking
     LinkYAxisRange = Yes
     }
 $!FrameControl ActivateByNumber
-  Frame = 5
+  Frame = 2
 $!SetStyleBase Config

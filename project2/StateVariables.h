@@ -7,7 +7,7 @@
 
 #include "Indexing.h"
 #include "Chemistry.h"
-// structure for storing calculated properties in an element
+// class for storing calculated properties in an element
 
 class State {
 
@@ -64,13 +64,11 @@ public:
             }
             Tstar = unk[NSP+1];
         }
+
+
         h0 +=  0.5*unk[NSP]*unk[NSP];                       //Mixture Total Enthaply
         p = rhoR*unk[NSP+1];                                //Presure
         a = sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));        //Wavespeed
-
-        if (_isnan(a)){
-            printf("bad\n");
-        }
 
         ASSERT(!_isnan(a), "failed to calculate sound speed")
 

@@ -3,7 +3,7 @@
 //
 
 #include <valarray>
-#include "Flux.h"
+#include "RHS.h"
 
 
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))
@@ -150,6 +150,8 @@ double F1pm(const int isPlus, const double M, const double rho, const double c){
 }
 
 void LeerFlux(const double A, const double* uL, const double* uR, Chem& air, double *flux){
+    // !!!NOT USED, LIKELY HAS ERRORS!!!
+
     //Convert to multispecies
     double F1L, F1R, fPlus[3], fMins[3];
 
