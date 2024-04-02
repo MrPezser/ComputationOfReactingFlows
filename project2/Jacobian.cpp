@@ -31,8 +31,7 @@ void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& v
     //total energy derivatives
 
     for (int isp=0; isp<NSP; isp++){
-        D[NSP+1][isp] = dti * (var.etr[isp] + (double)ireact*var.evTv[isp] + 0.5*unk[NSP]*unk[NSP]);//- (rhoCv/rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1];
-        D[NSP+1][NSP+2] += (double)ireact * dti * unk[isp]*var.cpvTv[isp];
+        D[NSP+1][isp] = dti * (var.etr[isp] - 0.5*unk[NSP]*unk[NSP]);//- (var.rhoCv/var.rhoR)*(air.Ruv/air.Mw[isp])*unk[NSP+1]);
     }
     D[NSP+1][NSP]   = dti * unk[NSP]*var.rho_mix;
     D[NSP+1][NSP+1] = dti * var.rhoCv;
@@ -40,10 +39,14 @@ void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& v
 
 
     if (ireact==1) {
-    //vibrational energy derivatives
     for (int isp=0; isp<NSP; isp++){
+        //vibrational energy derivatives
         D[NSP+2][isp] = dti * var.evTv[isp];
         D[NSP+2][NSP+2] += dti * unk[isp]*var.cpvTv[isp];
+
+        //other vib contributions
+        D[NSP+1][isp] += var.evTv[isp];
+        D[NSP+1][NSP+2] += dti * unk[isp]*var.cpvTv[isp];
 
 
         // Jacobian for Landau-Teller Relaxation Source Term
@@ -120,6 +123,15 @@ void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& v
         }
 
         ///!!!!!!!Still Need d omega / d temperature Jacobian terms
+    }
+
+    for (int i=0; i<NSP+3; i++){
+        for (int j=0; j<NSP+3; j++){
+            if (_isnan(D[i][j])){
+                printf("stop here");
+            }
+            ASSERT(!_isnan(D[i][j]), "Not a Number jacobian value")
+        }
     }
 
 }

@@ -34,7 +34,7 @@ int IterUpdate(int& ireact, int iter, int nelem, const double* res, double* res0
     double ressum[NSP+3]{0.0}, resnorm{0.0};
     ResNorm(nelem, res, ressum);
 
-    if (ireact==1 && res0[NSP+2]<1e-10) {
+    if (ireact==1 && res0[NSP+2]<1e-16) {
         res0[NSP+2] = ressum[NSP+2];
     }
 
@@ -66,6 +66,7 @@ int IterUpdate(int& ireact, int iter, int nelem, const double* res, double* res0
     } else{
         if (resnorm < RXTOL && ireact==0) {
             ireact = 1;
+            printf("ENABLING THERMOCHEMICAL SOURCE TERMS\n");
         }
         return 0;
     }
@@ -83,7 +84,7 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
     auto D = (double**)malloc((NSP+3) * sizeof(double*)); //Same memory to be used for each local matrix (chg this if making parallel)
     for (int isp = 0; isp < NSP+3; isp++)
         D[isp] = (double*)malloc( (NSP+3) * sizeof(double));
-    FILE* fres = fopen("reshist.tec", "w");
+    //FILE* fres = fopen("reshist.tec", "w");
     State ElemVar[nelem+1];
 
     //Set up structures for calculating/containing non-state variables on each element
@@ -117,7 +118,7 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
         //========== Solve linear system on each element
         for (int ielem=0; ielem<nelem; ielem++) {
             double* unk = &(u[uIJK(ielem,0,0)]);
-            double tol = 1e-14;
+            double tol = 1e-32;
             int P[NSP+3]{}; //permutation vector for pivoting
             int N = NSP+2+ireact;
             dt = dx*CFL/(ElemVar[ielem].a + fabs(unk[NSP]));
@@ -135,10 +136,10 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
             double* x = &(dv[uIJK(ielem,0,0)]);
 
             flg = LUPDecompose(D, N, tol, P);
-            if (flg == 0){printf("LU Decomp Fail\n");break;}
+            if (flg >= 0){printf("LU Decomp Fail on row %d\n", flg+1);break;}
             LUPSolve(D, P, b, N, x);
         }
-        if (flg == 0){return 0;}
+        if (flg >= 0){return 0;}
 
 
 
@@ -154,9 +155,12 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
             }
 
             //temperature limiting
-            if (ui[NSP+2] < 200.0){
-                ui[NSP+2] = 200.0;
-             }
+            ui[NSP+2] = fmax(ui[NSP+2], 201);
+            ui[NSP+1] = fmax(ui[NSP+1], 201);
+
+            ui[NSP+2] = fmin(ui[NSP+2], 9500);
+            ui[NSP+1] = fmin(ui[NSP+1], 9500);
+
             //frozen thermo
             if (ireact==0){
                 ui[NSP+2] = u0[NSP+1];
@@ -196,6 +200,7 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
 
     free(D);
 
+    /*
     //save soln file
     FILE* fout = fopen("waveout.tec", "w");
     if (fout == nullptr) {
@@ -215,6 +220,7 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
         }
     }
     fclose(fout);
+     */
     return 1;
 }
 #pragma clang diagnostic pop

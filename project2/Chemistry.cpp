@@ -35,6 +35,8 @@ double Chem::Calc_h_Curve(int isp, double T) {
     T4 = T*T3;
     T5 = T*T4;
 
+    ASSERT(T > 200.0, "Temp below curve fit")
+//    ASSERT(T < 9000.0, "Temp above curve fit")
 
     if (T > 1000.0) {
         return (Rs[isp])*(Ah[isp]*T + Bh[isp]*T2*0.5 + Ch[isp]*T3/3.0 + Dh[isp]*T4*0.25 + Eh[isp]*T5*0.2 + Fh[isp]);
@@ -48,6 +50,9 @@ double Chem::Calc_cp_Curve(int isp, double T) {
     T3 = T*T2;
     T4 = T*T3;
 
+    ASSERT(T > 200.0, "Temp below curve fit")
+//    ASSERT(T < 9000.0, "Temp above curve fit")
+
     if (T >= 1000.0) {
         return (Rs[isp])*(Ah[isp] + Bh[isp]*T + Ch[isp]*T2 + Dh[isp]*T3 + Eh[isp]*T4);
     } else {  //T<1000
@@ -58,6 +63,8 @@ double Chem::Calc_cp_Curve(int isp, double T) {
 //Translational Thermo
 double Chem::Get_cptr(int isp, double T){
     //if (isp>=3) return Calc_cp_Curve(isp,T);
+    ASSERT(T > 200.0, "Temp below curve fit")
+//    ASSERT(T < 9000.0, "Temp above curve fit")
 
     if (T > 1000.0) {
         return (Rs[isp]) * (Ah[isp]);
@@ -67,6 +74,9 @@ double Chem::Get_cptr(int isp, double T){
 }
 double Chem::Get_htr(int isp, double T){
     //if (isp>=3) return Calc_h_Curve(isp,T);
+
+    ASSERT(T > 200.0, "Temp below curve fit")
+//    ASSERT(T < 9000.0, "Temp above curve fit")
 
     if (T > 1000.0) {
         return (Rs[isp]) * (Ah[isp]*(T) + Fh[isp]);

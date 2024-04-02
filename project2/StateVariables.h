@@ -68,6 +68,12 @@ public:
         p = rhoR*unk[NSP+1];                                //Presure
         a = sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));        //Wavespeed
 
+        if (_isnan(a)){
+            printf("bad\n");
+        }
+
+        ASSERT(!_isnan(a), "failed to calculate sound speed")
+
         CalcEnergies(air, ireact);
 
         if (ireact==1){CalcRlxTime(air);}

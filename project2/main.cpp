@@ -42,8 +42,8 @@ int main() {
     double pb_ratio, pb,p0{};
 
     nelem = 200;
-    CFL = 0.05;
-    pb_ratio = 200;
+    CFL = 0.01;
+    pb_ratio = 200.0;
     ireact = 0;
 
     ///MAKE SURE THAT THERE IS CONSISTENCE AMONG THE INDEXING FOR DIFFEREENT FACE-VALUED VARIABLES/ARRAYS
@@ -51,7 +51,7 @@ int main() {
     double vel0, rho0, T0, YN20, YNO0, YO0, YN0, YO20;
     //Initial state as given
     vel0 = 3500.0;
-    rho0 = 0.0003074;
+    rho0 = 25.0 * 3.074e-4;
     T0 = 350;
     YN20 = 0.7643;
     YNO0 = 0.0;
@@ -102,16 +102,16 @@ int main() {
     }
     pb = p0*pb_ratio;
 
-    //Calculate post shock conditions (approx Mach 9 normal shock)
-    double rho_shock = 5.0;
+    //Approximate post shock conditions
+    double rho_shock = 5.8;
     u0back[0] = u0[0]*rho_shock;
     u0back[1] = u0[1]*rho_shock;
     u0back[2] = u0[2]*rho_shock;
     u0back[3] = u0[3]*rho_shock;
     u0back[4] = u0[4]*rho_shock;
-    u0back[5] = u0[4]/rho_shock;
-    u0back[6] = u0[6] * 15.0;
-    u0back[7] = u0[7] * 15.0;
+    u0back[5] = u0[5]/rho_shock;
+    u0back[6] = u0[6] * 17.0;
+    u0back[7] = u0[7] * 17.0;
 
     //Intialize flow
     auto u = (double*)malloc(nelem*NDEGR*(NSP+3)*sizeof(double));
@@ -121,7 +121,7 @@ int main() {
             //u[uIJK(ielem,0,7)] = u[uIJK(ielem,0,6)];
             for (int kvar=0; kvar<(NSP+3); kvar++){
 
-                if (xfa[ielem]<1.10) {   //Freestream conditions
+                if (xfa[ielem]<0.80) {   //Freestream conditions
                     u[uIJK(ielem, jdegr, kvar)] = u0[kvar];
 
                 } else {                //Post-Shock conditions
@@ -130,7 +130,7 @@ int main() {
             }
         }
     }
-    restart(nelem,u);
+    //restart(nelem,u);
 
     int success = solve(ireact, nelem, dx, CFL, pb, air, u0, u, xcc, Acc, Afa, dAdx);
 

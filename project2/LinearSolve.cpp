@@ -35,7 +35,9 @@ int LUPDecompose(double **A, int N, double Tol, int *P) {
                 imax = k;
             }
 
-        if (maxA < Tol) return 0; //failure, matrix is degenerate
+        if (maxA < Tol) {
+            return imax; //failure, matrix is degenerate
+        }
 
         if (imax != i) {
             //pivoting P
@@ -60,7 +62,7 @@ int LUPDecompose(double **A, int N, double Tol, int *P) {
         }
     }
 
-    return 1;  //decomposition done
+    return -1;  //decomposition done
 }
 
 /* INPUT: A,P filled in LUPDecompose; b - rhs vector; N - dimension

@@ -245,7 +245,7 @@ void PressureBC(double pb, double p, Chem& air, const double* u, double* uGhost)
     for (int isp=0;isp<NSP;isp++){
         uGhost[isp] = (u[isp])*rho_ratio;
     }
-    uGhost[NSP] = u[NSP]*rho_ratio;
+    uGhost[NSP] = u[NSP]/rho_ratio;
     uGhost[NSP+1] = u[NSP+1];
     uGhost[NSP+2] = u[NSP+2];
 

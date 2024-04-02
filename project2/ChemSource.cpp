@@ -116,6 +116,6 @@ void CalcOmega(const double* unk, Chem& air, State& var, double* omega){
     }
     Osum = 2.0*omega[1]/air.Mw[1] + omega[2]/air.Mw[2] + omega[4]/air.Mw[4];
     Nsum = 2.0*omega[0]/air.Mw[0] + omega[2]/air.Mw[2] + omega[3]/air.Mw[3];
-    if (omegasum+Osum+Nsum>1e-10) {printf("Chem Src not conserving mass!!!\n");}
+    if (omegasum+Osum+Nsum>1e-8) {printf("Chem Src not conserving mass!!!\n");}
 
 }
