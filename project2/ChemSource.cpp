@@ -51,7 +51,7 @@ void CalcOmega(const double* unk, Chem& air, State& var, double* omega){
         } else {
             rrtb = 1.0;
         }
-        var.RRtb[irx] = 0.0*rrtb;
+        var.RRtb[irx] = rrtb;
     }
 
     //For each reaction calculate the reaction contribution (save)
@@ -85,7 +85,7 @@ void CalcOmega(const double* unk, Chem& air, State& var, double* omega){
             }
         }
 
-        var.RRlma[irx] = 0.0;//concF*kf - concB*kb;
+        var.RRlma[irx] = concF*kf - concB*kb;
     }
     //Now assemble the chemical source term
     for (int isp=0; isp<NSP; isp++){

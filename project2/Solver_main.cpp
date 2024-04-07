@@ -98,6 +98,15 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
     ElemVar[nelem].Initialize(u0);
     ElemVar[nelem].UpdateState(air, ireact);
 
+    //save residual history
+    FILE* fres = fopen("res.tec", "w");
+    if (fres == nullptr) {
+        printf("~~~~~~~~~ Failed to save residual file, error:%d\n", errno);}
+    else {
+        fprintf(fres, "Residual history\n");
+        fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n",0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0);
+    }
+
     for (int iter=0; iter<MXITER; iter++){
         int flg{};
         //Loop through elements and conduct local timestepping
@@ -159,7 +168,6 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
             //temperature limiting
             ui[NSP+2] = fmax(ui[NSP+2], 201);
             //ui[NSP+1] = fmax(ui[NSP+1], 201);
-
             //ui[NSP+2] = fmin(ui[NSP+2], 9500);
             ui[NSP+1] = fmin(ui[NSP+1], 9500);
 
@@ -169,11 +177,21 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
             }
         }
 
-
-
-        if (iter%1000 ==0) {
+        //Save to residual log file
+        double ressum[NSP+3];
+        ResNorm(nelem, res, ressum);
+        if ( res0[7] > 1e-16) {
+            fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n", iter+1, ressum[0] / res0[0], ressum[1] / res0[1],
+                    ressum[2] / res0[2], ressum[3] / res0[3], ressum[4] / res0[4], ressum[5] / res0[5], ressum[6] / res0[6],
+                    ressum[7] / res0[7]);
+        } else {
+            fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n", iter+1, ressum[0] / res0[0], ressum[1] / res0[1],
+                    ressum[2] / res0[2], ressum[3] / res0[3], ressum[4] / res0[4], ressum[5] / res0[5], ressum[6] / res0[6],
+                    1.0);
+        }
+        //Printout Solution and residual
+        if (iter%1000 == 0) {
             iconv = IterUpdate(ireact, iter, nelem, CFL, res, res0);
-
 
             //save soln file
             FILE* fout = fopen("waveout.tec", "w");
@@ -194,35 +212,13 @@ int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, d
                 }
             }
             fclose(fout);
-
-
         }
+
         if (iconv == 1) {break;}
     }
 
     free(D);
-
-    /*
-    //save soln file
-    FILE* fout = fopen("waveout.tec", "w");
-    if (fout == nullptr) {
-        printf("~~~~~~~~~ Failed to save output file, error:%d\n", errno);}
-    else {
-        fprintf(fout, "TITLE = \"%s\"\n", "title");
-        fprintf(fout, "VARIABLES = \"X\",\"rhoN2\",\"rhoO2\",\"rhoNO\",\"rhoN\",\"rhoO\","
-                      "\"u\",\"T\",\"Tv\",\"P\",\"M\",\"YN2\",\"YO2\",\"YNO\",\"YN\",\"YO\"\n");
-        fprintf(fout, "ZONE I=%d, DATAPACKING=POINT\n", nelem);
-
-        for (int i=0; i<nelem; i++) {
-            double rm = ElemVar[i].rho_mix;
-            double *r = &(u[uIJK(i,0,0)]);
-            fprintf(fout,"%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",xcc[i],
-                    r[0], r[1], r[2], r[3], r[4], u[uIJK(i,0,5)], u[uIJK(i,0,6)], u[uIJK(i,0,7)],
-                    ElemVar[i].p, u[uIJK(i,0,5)]/ElemVar[i].a, r[0]/rm, r[1]/rm, r[2]/rm, r[3]/rm, r[4]/rm);
-        }
-    }
-    fclose(fout);
-     */
+    fclose(fres);
     return 1;
 }
 #pragma clang diagnostic pop
