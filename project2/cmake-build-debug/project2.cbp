@@ -80,25 +80,46 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/ChemSource.cpp">
+			<Option target="project2"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/ChemSource.h">
+			<Option target="project2"/>
+		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Chemistry.cpp">
 			<Option target="project2"/>
 		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Chemistry.h">
 			<Option target="project2"/>
 		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Flux.cpp">
-			<Option target="project2"/>
-		</Unit>
-		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Flux.h">
-			<Option target="project2"/>
-		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Indexing.h">
+			<Option target="project2"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Jacobian.cpp">
+			<Option target="project2"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Jacobian.h">
+			<Option target="project2"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/LinearSolve.cpp">
+			<Option target="project2"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/LinearSolve.h">
+			<Option target="project2"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/RHS.cpp">
+			<Option target="project2"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/RHS.h">
 			<Option target="project2"/>
 		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Solver_main.cpp">
 			<Option target="project2"/>
 		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/Solver_main.h">
+			<Option target="project2"/>
+		</Unit>
+		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/StateVariables.h">
 			<Option target="project2"/>
 		</Unit>
 		<Unit filename="C:/Users/Tsail/OneDrive/Documents/Projects/CFD/ComputationOfReactingFlows/project2/main.cpp">

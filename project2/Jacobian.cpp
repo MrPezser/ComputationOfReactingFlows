@@ -54,7 +54,7 @@ void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& v
         if (var.taui[isp] > 0) { //flag for
             //D[NSP+2][isp]   += -(var.evT[isp] - var.evTv[isp]) * var.taui[isp];
             D[NSP+2][NSP+1] += -unk[isp]*var.cpvT[isp]  * var.taui[isp];
-            D[NSP+2][NSP+2] +=  fabs(unk[isp]*var.cpvTv[isp] * var.taui[isp]);
+            D[NSP+2][NSP+2] += (unk[isp]*var.cpvTv[isp] * var.taui[isp]);
         }
     }
 
@@ -114,20 +114,23 @@ void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& v
             double SChemJac;
 
             for (int isp = 0; isp < NSP; isp++) {
-                for (int jsp = 0; jsp < NSP; jsp++) {
+                //for (int jsp = 0; jsp < NSP; jsp++) {
+                int jsp = isp;
                     SChemJac = 0.0;
                     // d_omega_s(i) / d_rho_s(j)
                     //d[i][j] = Mw[i] * (sum of dRj with coefficients from omega_i)
                     // air.nu[rx][sp] = (v'' - v') for species sp in reaxtion rx (related to omega[i])
 
+
                     for (int krx = 0; krx < NSP; krx++) {
+                        double nu = air.nu[krx][isp];
                         SChemJac += air.Mw[isp] * air.nu[krx][isp] * dRdrho[krx][jsp];//air.Mw[isp];
                     }
 
                     D[isp][jsp] += SChemJac;
-                }
+                //}
             }
-
+            /*
             //Temp jacobians by numerical forward differencing
             double omega[NSP], omgT[NSP], omgTv[NSP], delT, delTv, del;
             CalcOmega(unk, air, var, omega); //baseline omega
@@ -148,7 +151,7 @@ void BuildJacobian(int ireact, double dt, const double* unk, Chem &air, State& v
             for (int isp = 0; isp < NSP; isp++) {
                 D[isp][NSP + 1] += (omgT[isp] - omega[isp]) / delT;
                 D[isp][NSP + 2] += (omgTv[isp] - omega[isp]) / delTv;
-            }
+            }*/
         }
 
     }

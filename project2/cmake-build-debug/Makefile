@@ -128,6 +128,30 @@ project2/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/build
 .PHONY : project2/fast
 
+ChemSource.obj: ChemSource.cpp.obj
+.PHONY : ChemSource.obj
+
+# target to build an object file
+ChemSource.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/ChemSource.cpp.obj
+.PHONY : ChemSource.cpp.obj
+
+ChemSource.i: ChemSource.cpp.i
+.PHONY : ChemSource.i
+
+# target to preprocess a source file
+ChemSource.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/ChemSource.cpp.i
+.PHONY : ChemSource.cpp.i
+
+ChemSource.s: ChemSource.cpp.s
+.PHONY : ChemSource.s
+
+# target to generate assembly for a file
+ChemSource.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/ChemSource.cpp.s
+.PHONY : ChemSource.cpp.s
+
 Chemistry.obj: Chemistry.cpp.obj
 .PHONY : Chemistry.obj
 
@@ -152,29 +176,77 @@ Chemistry.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Chemistry.cpp.s
 .PHONY : Chemistry.cpp.s
 
-Flux.obj: Flux.cpp.obj
-.PHONY : Flux.obj
+Jacobian.obj: Jacobian.cpp.obj
+.PHONY : Jacobian.obj
 
 # target to build an object file
-Flux.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Flux.cpp.obj
-.PHONY : Flux.cpp.obj
+Jacobian.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Jacobian.cpp.obj
+.PHONY : Jacobian.cpp.obj
 
-Flux.i: Flux.cpp.i
-.PHONY : Flux.i
+Jacobian.i: Jacobian.cpp.i
+.PHONY : Jacobian.i
 
 # target to preprocess a source file
-Flux.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Flux.cpp.i
-.PHONY : Flux.cpp.i
+Jacobian.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Jacobian.cpp.i
+.PHONY : Jacobian.cpp.i
 
-Flux.s: Flux.cpp.s
-.PHONY : Flux.s
+Jacobian.s: Jacobian.cpp.s
+.PHONY : Jacobian.s
 
 # target to generate assembly for a file
-Flux.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Flux.cpp.s
-.PHONY : Flux.cpp.s
+Jacobian.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/Jacobian.cpp.s
+.PHONY : Jacobian.cpp.s
+
+LinearSolve.obj: LinearSolve.cpp.obj
+.PHONY : LinearSolve.obj
+
+# target to build an object file
+LinearSolve.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/LinearSolve.cpp.obj
+.PHONY : LinearSolve.cpp.obj
+
+LinearSolve.i: LinearSolve.cpp.i
+.PHONY : LinearSolve.i
+
+# target to preprocess a source file
+LinearSolve.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/LinearSolve.cpp.i
+.PHONY : LinearSolve.cpp.i
+
+LinearSolve.s: LinearSolve.cpp.s
+.PHONY : LinearSolve.s
+
+# target to generate assembly for a file
+LinearSolve.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/LinearSolve.cpp.s
+.PHONY : LinearSolve.cpp.s
+
+RHS.obj: RHS.cpp.obj
+.PHONY : RHS.obj
+
+# target to build an object file
+RHS.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/RHS.cpp.obj
+.PHONY : RHS.cpp.obj
+
+RHS.i: RHS.cpp.i
+.PHONY : RHS.i
+
+# target to preprocess a source file
+RHS.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/RHS.cpp.i
+.PHONY : RHS.cpp.i
+
+RHS.s: RHS.cpp.s
+.PHONY : RHS.s
+
+# target to generate assembly for a file
+RHS.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\project2.dir\build.make CMakeFiles/project2.dir/RHS.cpp.s
+.PHONY : RHS.cpp.s
 
 Solver_main.obj: Solver_main.cpp.obj
 .PHONY : Solver_main.obj
@@ -233,12 +305,21 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... project2
+	@echo ... ChemSource.obj
+	@echo ... ChemSource.i
+	@echo ... ChemSource.s
 	@echo ... Chemistry.obj
 	@echo ... Chemistry.i
 	@echo ... Chemistry.s
-	@echo ... Flux.obj
-	@echo ... Flux.i
-	@echo ... Flux.s
+	@echo ... Jacobian.obj
+	@echo ... Jacobian.i
+	@echo ... Jacobian.s
+	@echo ... LinearSolve.obj
+	@echo ... LinearSolve.i
+	@echo ... LinearSolve.s
+	@echo ... RHS.obj
+	@echo ... RHS.i
+	@echo ... RHS.s
 	@echo ... Solver_main.obj
 	@echo ... Solver_main.i
 	@echo ... Solver_main.s

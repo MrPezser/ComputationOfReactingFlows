@@ -44,8 +44,8 @@ public:
             for (int isp = 0; isp < NSP; isp++) {
                 cptr[isp] = air.Get_cptr(isp, unk[NSP + 1]);
 
-                rhoR += unk[isp] * air.Ruv / air.Mw[isp];
-                rhoCv += unk[isp] * (cptr[isp] - air.Ruv / air.Mw[isp]);
+                rhoR += unk[isp] * air.Rs[isp];
+                rhoCv += unk[isp] * (cptr[isp] - air.Rs[isp]);
                 rhoCp += unk[isp] * (cptr[isp]);
                 h0 += unk[isp] * air.Get_htotal(isp, unk[NSP + 1], unk[NSP + 2]) / rho_mix;
                 hv += unk[isp] * air.Get_hv(isp, unk[NSP + 1], unk[NSP + 2]) / rho_mix;   //Mixture Vibrational Enthalpy
@@ -56,7 +56,7 @@ public:
             for (int isp = 0; isp < NSP; isp++) {
                 cptr[isp] = air.Calc_cp_Curve(isp, unk[NSP + 1]);
 
-                rhoR += unk[isp] * air.Ruv / air.Mw[isp];
+                rhoR += unk[isp] * air.Rs[isp];
                 rhoCv += unk[isp] * (cptr[isp] - air.Rs[isp]);
                 rhoCp += unk[isp] * (cptr[isp]);
                 h0 += unk[isp] * air.Calc_h_Curve(isp, unk[NSP + 1]) / rho_mix;

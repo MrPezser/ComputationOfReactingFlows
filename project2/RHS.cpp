@@ -331,12 +331,13 @@ void CalcRes(int ireact, int nelem, double dx, double CFL, double pb, Chem &air,
                     omega[isp] = 0.0;
                 }
             }
+
             //Vib source term
             tne_src = 0.0;
             for (int isp = 0; isp < NSP; isp++) {
                 //vibrational nonequilibrium
                 if (var.taui[isp] >= 0.0) {
-                    tne_src += ui[isp] * (var.evT[isp] - var.evTv[isp]) * var.taui[isp];
+                   tne_src += ui[isp] * (var.evT[isp] - var.evTv[isp]) * var.taui[isp];
                 }
 
 

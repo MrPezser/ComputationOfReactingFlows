@@ -62,7 +62,7 @@ double Chem::Calc_cp_Curve(int isp, double T) {
 
 //Translational Thermo
 double Chem::Get_cptr(int isp, double T){
-    //if (isp>=3) return Calc_cp_Curve(isp,T);
+    if (isp>=3) return Calc_cp_Curve(isp,T);
     ASSERT(T > 200.0, "Temp below curve fit")
     ASSERT(T < 10000.0, "Temp way above curve fit")
 
@@ -73,7 +73,7 @@ double Chem::Get_cptr(int isp, double T){
     }
 }
 double Chem::Get_htr(int isp, double T){
-    //if (isp>=3) return Calc_h_Curve(isp,T);
+    if (isp>=3) return Calc_h_Curve(isp,T);
 
     ASSERT(T > 200.0, "Temp below curve fit")
     ASSERT(T < 10000.0, "Temp way above curve fit")
@@ -87,24 +87,24 @@ double Chem::Get_htr(int isp, double T){
 
 //Vibrational Thermo
 double Chem::Get_hv(int isp, double T, double Tv) {
-    //if (isp>=3) return 0.0;
+    if (isp>=3) return 0.0;
 
-    double cptr, hv;//, h_f;
+    double cptr, hv, h_f;
     cptr = Get_cptr(isp, T);
     hv = Calc_h_Curve(isp, Tv);
 
-    /*
-    if (Tv > 1000.0) {
-        h_f = Fh[isp];
-    } else {
-        h_f = Fl[isp];
-    }*/
 
-    hv += -cptr*(Tv - Tref) - Calc_h_Curve(isp, Tref); //h_f;
+    if (Tv > 1000.0) {
+        h_f = Rs[isp]*Fh[isp];
+    } else {
+        h_f = Rs[isp]*Fl[isp];
+    }
+
+    hv += -cptr*(Tv - Tref) - Calc_h_Curve(isp, Tref);
     return hv;
 }
 double Chem::Get_cpv(int isp, double T, double Tv) {
-    //if (isp>=3) return 0.0;
+    if (isp>=3) return 0.0;
 
     double cptr, cpv;
     cptr = Get_cptr(isp, T);
