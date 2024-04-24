@@ -25,6 +25,9 @@ void ResNorm(int nelem, const double* res, double* resout) {
     for (int ivar=0; ivar<NVAR; ivar++){
         resout[ivar] = sqrt(ressum[ivar]);
     }
+    if (resout[6] < 1e-10){
+        resout[6] = RESTOL*RESTOL;
+    }
 }
 
 
@@ -129,6 +132,9 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
             //for (int isp=0; isp<2; isp++){
             //    res0[isp] = rhores;
             //}
+            if (res0[6] < 1e-10){
+                res0[6] = 1.0;
+            }
         }
 
         //========== Solve linear system on each element

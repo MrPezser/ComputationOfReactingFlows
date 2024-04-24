@@ -51,12 +51,12 @@ int main() {
     Chem air = Chem();
     double M0, p0, T0, yO20, yN20, yRP0, Yv0, dp0;
     //Initial state as given
-    M0 = 2.0 * 2.5;
+    M0 = 2.5;
     p0 = 102325.0;
     T0 = 300.0;
     yN20 = 0.7643;
     yRP0 = 0.0;
-    Yv0 = 0.94;
+    Yv0 = 1.0;  //0.94;
     dp0 = 10.0e-6;
 
     double dx, xmin, xmax, xcc[nelem], xfa[nelem+1],

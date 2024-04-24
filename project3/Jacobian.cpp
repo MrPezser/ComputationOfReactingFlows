@@ -28,7 +28,7 @@ void BuildJacobian(int isource, double dt, const double* unk, Chem &air, State& 
 
     //      d/d(Yv)
     double drhodYv = -var.rho_mix*var.rho_mix * (1.0/var.rhov - 1.0/var.rhol);
-    double dhdYv = 0.0;//var.hv - var.hl;
+    double dhdYv = var.hv - var.hl;
 
     D[0][2] = dti * (unk[0] * (drhodYv * Yv + var.rho_mix));
     D[1][2] = dti * (unk[1] * (drhodYv * Yv + var.rho_mix));
