@@ -3,6 +3,8 @@
 //
 
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include "LinearSolve.h"
 
 
@@ -36,7 +38,9 @@ int LUPDecompose(double **A, int N, double Tol, int *P) {
             }
 
         if (maxA < Tol) {
-            return imax; //failure, matrix is degenerate
+            printf("LU Decomp Fail on row %d\n", imax+1);
+            exit(0);
+            //return imax; //failure, matrix is degenerate
         }
 
         if (imax != i) {

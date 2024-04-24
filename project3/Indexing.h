@@ -6,12 +6,12 @@
 #define PROJECT2_INDEXING_H
 
 #define NDEGR 1
-#define NSP 3
-#define NVAR NSP+4
+#define NUMSP 3
+#define NVAR 7
 
-#define uIJK(ielem,jdegr,kvar)  (((ielem)*NDEGR + (jdegr))*(NSP+3) + (kvar))
+#define uIJK(ielem,jdegr,kvar)  (((ielem)*NDEGR + (jdegr))*(NVAR) + (kvar))
 #define aIJ(ielem,jdegr) ((ielem)*NDEGR + (jdegr))
-#define fIJ(ielem,kvar)  ((ielem)*(NSP+3) + (kvar))
+#define fIJ(ielem,kvar)  ((ielem)*(NVAR) + (kvar))
 #define IJ(i,j,nj) ((i)*(nj) + (j))
 
 //#define MXITER 1

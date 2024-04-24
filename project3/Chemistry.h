@@ -14,15 +14,15 @@ class Chem {
 private:
 
     //curve fit coefficients
-    double Al[NSP]{}, Bl[NSP]{}, Cl[NSP]{}, Dl[NSP]{}, El[NSP]{}, Fl[NSP]{}, Gl[NSP]{};
-    double Ah[NSP]{}, Bh[NSP]{}, Ch[NSP]{}, Dh[NSP]{}, Eh[NSP]{}, Fh[NSP]{}, Gh[NSP]{};
+    double Al[NUMSP]{}, Bl[NUMSP]{}, Cl[NUMSP]{}, Dl[NUMSP]{}, El[NUMSP]{}, Fl[NUMSP]{}, Gl[NUMSP]{};
+    double Ah[NUMSP]{}, Bh[NUMSP]{}, Ch[NUMSP]{}, Dh[NUMSP]{}, Eh[NUMSP]{}, Fh[NUMSP]{}, Gh[NUMSP]{};
     void LoadCurveFits();
 
 public:
 
     //molecular weight
-    double Mw[NSP]{};
-    double Rs[NSP]{};
+    double Mw[NUMSP]{};
+    double Rs[NUMSP]{};
     double Ruv= 8314.34;
     double RHOLREF = 800.0;
     double PREF = 101325.0;

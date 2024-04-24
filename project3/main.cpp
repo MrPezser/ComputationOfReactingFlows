@@ -4,9 +4,10 @@
 #include "Indexing.h"
 #include "Chemistry.h"
 #include "Solver_main.h"
+#include "StateVariables.h"
 
 double surf_height(const double x){
-    return fmin(2.0, 1 + 4*(x-0.5)*(x-0.5));
+    return fmin(2.0, 1.0 + 4*(x-0.5)*(x-0.5));
 }
 
 double area_slope(const double x){
@@ -43,16 +44,16 @@ int main() {
 
     nelem = 150;
     CFL = 0.4;    // will be reduced by multiplication with CFLTCNE(=0.25) when source terms are enabled
-    pb_ratio = 50.0;
+    pb_ratio = 1.0;//50.0;
     isource = 0;
 
     ///MAKE SURE THAT THERE IS CONSISTENCE AMONG THE INDEXING FOR DIFFEREENT FACE-VALUED VARIABLES/ARRAYS
     Chem air = Chem();
     double M0, p0, T0, yO20, yN20, yRP0, Yv0, dp0;
     //Initial state as given
-    M0 = 2.5;
+    M0 = 2.0 * 2.5;
     p0 = 102325.0;
-    T0 = 300;
+    T0 = 300.0;
     yN20 = 0.7643;
     yRP0 = 0.0;
     Yv0 = 0.94;
@@ -87,24 +88,21 @@ int main() {
     //Find initial flow variables
     yO20 = 1.0 - yN20 - yRP0;
     double rhol = air.RHOLREF + (p0 - air.PREF)/(air.AREF*air.AREF);
-    double rhov = p0 / (T0*(yO20*air.Rs[0] + yN20*air.Rs[1] + yRP0*air.Rs[2]));
-    double rho_mix = 1.0 / ((Yv0/rhov) + ((1.0-Yv0)/rhol));
-
-    double rhoR = p0/T0;
-    double rhoCv = rhov * (yO20*(air.Calc_cp_Curve(0,T0)-air.Rs[0]) +
-                                   yN20*(air.Calc_cp_Curve(1,T0)-air.Rs[1]) +
-                                   yRP0*(air.Calc_cp_Curve(2,T0)-air.Rs[2]));
-    double a0 = sqrt((p0/rho_mix)*(1.0 + rhoR/rhoCv));
 
     double u0[8], u0back[8];
     u0[0] = yO20;       //fraction of vapor which is O2
     u0[1] = yN20;       // same for N2
     u0[2] = Yv0;        //Fraction of mas which is vapor
     u0[3] = p0;         //pressure
-    u0[4] = M0 * a0;    //velocity
+    u0[4] = M0 * 300.0;    //velocity placeholder
     u0[5] = T0;         //Temperature
     u0[6] = 6.0*(1.0-Yv0) / (M_PI*rhol*dp0*dp0*dp0);         //Number density
 
+    State var;
+    var.Initialize(u0);
+    var.UpdateState(air,isource);
+    u0[4] = M0 * var.a;    //actual velocity
+    var.UpdateState(air,isource);
 
     pb = p0*pb_ratio;
 
@@ -115,17 +113,17 @@ int main() {
     u0back[0] = u0[0];
     u0back[1] = u0[1];
     u0back[2] = u0[2];
-    u0back[3] = u0[3]*p_shock;
-    u0back[4] = u0[4]*u_shock;
-    u0back[5] = u0[5]*T_shock;
+    u0back[3] = u0[3];// *p_shock;
+    u0back[4] = u0[4];// /u_shock;
+    u0back[5] = u0[5];// *T_shock;
     u0back[6] = u0[6];
 
     //Intialize flow
-    auto u = (double*)malloc(nelem*NDEGR*(NSP+3)*sizeof(double));
+    auto u = (double*)malloc(nelem*NDEGR*(NVAR)*sizeof(double));
     //restart(nelem,u);
     for(int ielem=0; ielem<nelem; ielem++) {
         for (int jdegr=0; jdegr<NDEGR; jdegr++){
-            for (int kvar=0; kvar<(NSP+3); kvar++){
+            for (int kvar=0; kvar<(NVAR); kvar++){
 
                 if (xfa[ielem]<0.8) {   //Freestream conditions
                     u[uIJK(ielem, jdegr, kvar)] = u0[kvar];

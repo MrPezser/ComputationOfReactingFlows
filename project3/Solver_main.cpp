@@ -48,29 +48,31 @@ int IterUpdate(int& isource, int iter, int nelem,double& CFL, const double* res,
     if (IDETAIL)
     {
         for (int ie=0; ie<nelem; ie++){
-            for (int iv=0; iv<NSP+3; iv++) {
+            for (int iv=0; iv<NVAR; iv++) {
                 ressum[iv] += (res[fIJ(ie,iv)])*(res[fIJ(ie,iv)]);
             }
         }
         double maxres = sqrt(ressum[0]);
-        for (int iv=0; iv<NSP+3; iv++) { // NOLINT(modernize-loop-convert)
+        for (int iv=0; iv<NVAR; iv++) { // NOLINT(modernize-loop-convert)
             ressum[iv] = sqrt(ressum[iv]);
             maxres = fmax(maxres, ressum[iv]);
         }
-        printf("\t\tRes:%8.1e %8.1e %8.1e %8.1e %8.1e %8.1e %8.1e %8.1e ",
-               ressum[0],ressum[1],ressum[2],ressum[3],ressum[4],ressum[5],ressum[6],ressum[7]);
+        printf("\t\tRes:%8.1e %8.1e %8.1e %8.1e %8.1e %8.1e %8.1e ",
+               ressum[0],ressum[1],ressum[2],ressum[3],ressum[4],ressum[5],ressum[6]);
     }
     printf("\n");
 
     if (resnorm < RESTOL){
         return 1;
     } else{
+        /*
         if (resnorm < RXTOL && isource==0) {
             isource = 1;
             CFL = CFL*CFLTCNE;
             //return 1;///ONLY DO FULLY FROZEN FLOW
             printf("ENABLING MULTIPHASE SOURCE TERMS\n");
         }
+         */
         return 0;
     }
 }
@@ -123,19 +125,19 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
             ResNorm(nelem, res, res0);
 
             //normalize the first two residuals by the total change in vapor species fraction
-            double rhores = res0[0] + res0[1];
-            for (int isp=0; isp<2; isp++){
-                res0[isp] = rhores;
-            }
+            //double rhores = res0[0] + res0[1];
+            //for (int isp=0; isp<2; isp++){
+            //    res0[isp] = rhores;
+            //}
         }
 
         //========== Solve linear system on each element
         for (int ielem=0; ielem<nelem; ielem++) {
             double* unk = &(u[uIJK(ielem,0,0)]);
-            double tol = 1e-32;
-            int P[NVAR]{}; //permutation vector for pivoting
-            int N = NVAR - 1 + isource;
-            dt = dx*CFL/(ElemVar[ielem].a + fabs(unk[NSP]));
+            double tol = 1e-20;
+            int P[NVAR+1]{}; //permutation vector for pivoting
+            int N = NVAR;
+            dt = dx*CFL/(ElemVar[ielem].a + fabs(unk[4]));
 
             //Evaluate the jacobian / Implicit matrix
             BuildJacobian(isource, dt, unk, air, ElemVar[ielem], D);
@@ -149,11 +151,9 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
             double* b = &(res[uIJK(ielem,0,0)]);
             double* x = &(dv[uIJK(ielem,0,0)]);
 
-            flg = LUPDecompose(D, N, tol, P);
-            if (flg >= 0){printf("LU Decomp Fail on row %d\n", flg+1);break;}
+            (void)LUPDecompose(D, N, tol, P);
             LUPSolve(D, P, b, N, x);
         }
-        if (flg >= 0){return 0;}
 
 
 
@@ -162,20 +162,20 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
         for (int ielem=0; ielem<nelem; ielem++){
             double* ui = &(u[uIJK(ielem,0,0)]);
 
-            for (int kvar=0; kvar<NSP+3; kvar++){
+            for (int kvar=0; kvar<NVAR; kvar++){
                 int id = uIJK(ielem,0,kvar);
                 u[id] += dv[id];
-                dv[id] = 0.0; //reset
+                dv[id] = 0.0; //reset dv array
             }
 
             //temperature limiting
-            ui[5] = fmax(ui[NSP+1], 201);
-            ui[5] = fmin(ui[NSP+1], 6001);
+            ui[5] = fmax(ui[5], 201);
+            ui[5] = fmin(ui[5], 6001);
 
         }
 
         //Save to residual log file
-        double ressum[NSP+3];
+        double ressum[NVAR];
         ResNorm(nelem, res, ressum);
         if ( res0[2] > 1e-16) {
             fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n", iter+1, ressum[0] / res0[0], ressum[1] / res0[1],
@@ -185,7 +185,7 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
                     1.0, ressum[3] / res0[3], ressum[4] / res0[4], ressum[5] / res0[5], ressum[6] / res0[6]);
         }
         //Printout Solution and residual
-        if (iter%1000 == 0) {
+        if (iter%100 == 0) {
             iconv = IterUpdate(isource, iter, nelem, CFL, res, res0);
 
             //save soln file

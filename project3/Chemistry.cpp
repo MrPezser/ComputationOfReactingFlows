@@ -10,7 +10,7 @@ void Chem::LoadCurveFits(){
     FILE* ftherm = fopen("../therm_ONRP.dat","r");
     ASSERT(ftherm, "Unable to open thermo file!") //if null, exit
 
-    for (int isp=0; isp<NSP; isp++) {
+    for (int isp=0; isp<NUMSP; isp++) {
         //get molecular weight from first line
         fscanf(ftherm, "%*18s %*6c %*1c%*f%*1c %*f %*f %*2f %*s %*f %*f %lf %*d", &(Mw[isp]));
         //get curve fits
