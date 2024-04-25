@@ -191,7 +191,7 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
                     1.0, ressum[3] / res0[3], ressum[4] / res0[4], ressum[5] / res0[5], ressum[6] / res0[6]);
         }
         //Printout Solution and residual
-        if (iter%100 == 0) {
+        if (iter%500 == 0) {
             iconv = IterUpdate(isource, iter, nelem, CFL, res, res0);
 
             //save soln file
@@ -201,14 +201,15 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
             else {
                 fprintf(fout, "TITLE = \"%s\"\n", "title");
                 fprintf(fout, "VARIABLES = \"X\",\"yO2v\",\"yN2v\",\"Yv\",\"P\",\"u\","
-                              "\"T\",\"n_tilde\",\"rho_mix\",\"Mach\"\n");
+                              "\"T\",\"n_tilde\",\"rho_mix\",\"Mach\",\"dp\"\n");
                 fprintf(fout, "ZONE I=%d, DATAPACKING=POINT\n", nelem);
 
                 for (int i=0; i<nelem; i++) {
                     double rm = ElemVar[i].rho_mix;
                     double* unk = &(u[uIJK(i,0,0)]);
-                    fprintf(fout,"%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",xcc[i],
-                            unk[0], unk[1], unk[2], unk[3], unk[4], unk[5], unk[6],rm, unk[4]/ElemVar[i].a);
+                    double dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*ElemVar[i].rhol*unk[6]) );
+                    fprintf(fout,"%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",xcc[i],
+                            unk[0], unk[1], unk[2], unk[3], unk[4], unk[5], unk[6],rm, unk[4]/ElemVar[i].a, dp);
                 }
             }
             fclose(fout);

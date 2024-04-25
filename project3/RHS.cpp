@@ -5,7 +5,7 @@
 #include <valarray>
 #include "RHS.h"
 
-
+#define K  (0.0)
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))
 
 void LDFSS(const double A, const double* uL, State& varL, const double* uR, State& varR, Chem &air, double* flux) {
@@ -80,6 +80,30 @@ c --------------------------------------------------------------------
     flux[6] = fml*uL[6]   + fmr*uR[6];
 }
 
+double VaporSource(const double A, const double* unk, State& var, Chem& air){
+    double Bvap, Sh, Re, cpmix, muv, dp, DeltaU, Pr, Sc, Sv;
+    double T = unk[5];
+
+    Pr = 0.7;
+    Sc = 0.7;
+
+    DeltaU = K * unk[4];
+
+    dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*var.rhol*unk[6]) );
+    if (dp < 1e-6) return 0.0;
+
+    muv = (1.716e-5) * pow(T/273.15, 3.0/2.0) * ((273.15 + 110.4)/(T + 110.4));
+    cpmix = unk[0]*air.Calc_cp_Curve(0,T) + unk[1]*air.Calc_cp_Curve(1,T) + (1.0-unk[0]-unk[1])*air.Calc_cp_Curve(2,T);
+    Re = (var.rhov * DeltaU * dp) / muv;
+    Sh = 2.0 + 0.552*sqrt(Re)* cbrt(Sc);
+    Bvap = cpmix * fmax(0, T-444.0) / air.HVAP;
+    Sv = 2.0 * M_PI * var.rho_mix * unk[6] * dp * Sh * (muv/Pr) * log(1 + Bvap);
+    ASSERT(!_isnan(Sv),"NaN source term")
+
+    return A * Sv;
+
+}
+
 void PressureBC(double pb, const double* u, double* uGhost){
 
     for (int kv=0; kv<NVAR; kv++){
@@ -89,8 +113,8 @@ void PressureBC(double pb, const double* u, double* uGhost){
 
 }
 
-void CalcRes(int ireact, int nelem, double dx, double CFL, double pb, Chem &air, State* ElemVar, double* u0, double* u,
-             const double* Acc,const double* Afa,const double* dAdx, double* res) {
+void CalcRes(int isource, int nelem, double dx, double CFL, double pb, Chem &air, State* ElemVar, double* u0, double* u,
+             const double* Acc, const double* Afa, const double* dAdx, double* res) {
     //Find the common flux at each face
     double flux_comm[(nelem+1)*(NVAR)], uBack[NVAR];
     double src{};
@@ -117,7 +141,8 @@ void CalcRes(int ireact, int nelem, double dx, double CFL, double pb, Chem &air,
 
     //Inflow
     uL = u0;
-    varL = ElemVar[nelem]; //freestream vars
+    varL.Initialize(u0); //freestream vars
+    varL.UpdateState(air, isource);
     uR = &(u[uIJK(0, 0, 0)]);
     varR = ElemVar[0];
 
@@ -131,7 +156,7 @@ void CalcRes(int ireact, int nelem, double dx, double CFL, double pb, Chem &air,
     PressureBC(pb, uL, uBack);
     uR = uBack;
     varR.Initialize(uR);
-    varR.UpdateState(air, ireact);
+    varR.UpdateState(air, isource);
 
     flux = &flux_comm[fIJ(nelem, 0)];
     LDFSS(Afa[nelem], uL, varL, uR, varR, air, flux);
@@ -153,6 +178,11 @@ void CalcRes(int ireact, int nelem, double dx, double CFL, double pb, Chem &air,
         }
         //Pressure source term
         res[id+4] += ui[3]*(Afa[ielem+1] - Afa[ielem])/dx; // dAdx[ielem];
+
+        //vapor source term
+        if (isource == 1) {
+            res[id + 2] += VaporSource(Acc[ielem], ui, ElemVar[ielem], air);
+        }
 
     }
 }

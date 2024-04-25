@@ -9,7 +9,7 @@
 #include "Chemistry.h"
 #include "StateVariables.h"
 
-void CalcRes(int ireact, int nelem, double dx, double CFL, double pb, Chem &air, State* ElemVar, double* u0, double* u,
-             const double* Acc,const double* Afa,const double* dAdx, double* res);
+void CalcRes(int isource, int nelem, double dx, double CFL, double pb, Chem &air, State* ElemVar, double* u0, double* u,
+             const double* Acc, const double* Afa, const double* dAdx, double* res);
 
 #endif //PROJECT2_RHS_H

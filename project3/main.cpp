@@ -43,9 +43,9 @@ int main() {
     double pb_ratio, pb;
 
     nelem = 150;
-    CFL = 0.4;    // will be reduced by multiplication with CFLTCNE(=0.25) when source terms are enabled
-    pb_ratio = 1.0;//50.0;
-    isource = 0;
+    CFL = 0.4;
+    pb_ratio = 10.0;
+    isource = 1;
 
     ///MAKE SURE THAT THERE IS CONSISTENCE AMONG THE INDEXING FOR DIFFEREENT FACE-VALUED VARIABLES/ARRAYS
     Chem air = Chem();
@@ -56,8 +56,10 @@ int main() {
     T0 = 300.0;
     yN20 = 0.7643;
     yRP0 = 0.0;
-    Yv0 = 1.0;  //0.94;
-    dp0 = 10.0e-6;
+    Yv0 = 0.94;
+    dp0 = 20.0e-6;
+
+    ///Mach number higher than prompt   |||   Temperature lower than prompt
 
     double dx, xmin, xmax, xcc[nelem], xfa[nelem+1],
             Acc[nelem],Afa[nelem+1], dAdx[nelem];
@@ -73,17 +75,17 @@ int main() {
         double s;
         //Area at cell ceneters
         s = surf_height(xcc[aIJ(i,0)]);
-        Acc[aIJ(i,0)] = M_PI*s*s;
+        Acc[aIJ(i,0)] = s   ;//  M_PI*s*s;
 
         //Area at faces of cel
         s = surf_height(xfa[i]);
-        Afa[i] = M_PI*s*s;
+        Afa[i] = s      ;// M_PI*s*s;
 
         //Slope of area at cell centers
         dAdx[aIJ(i,0)] = area_slope(xcc[aIJ(i,0)]);
     }
     xfa[nelem] = nelem*dx;
-    Afa[nelem] = M_PI*surf_height(xfa[nelem])*surf_height(xfa[nelem]);
+    Afa[nelem] = surf_height(xfa[nelem])    ;//  M_PI*surf_height(xfa[nelem])*surf_height(xfa[nelem]);
 
     //Find initial flow variables
     yO20 = 1.0 - yN20 - yRP0;
@@ -113,9 +115,9 @@ int main() {
     u0back[0] = u0[0];
     u0back[1] = u0[1];
     u0back[2] = u0[2];
-    u0back[3] = u0[3];// *p_shock;
-    u0back[4] = u0[4];// /u_shock;
-    u0back[5] = u0[5];// *T_shock;
+    u0back[3] = u0[3]*p_shock;
+    u0back[4] = u0[4]/u_shock;
+    u0back[5] = u0[5]*T_shock;
     u0back[6] = u0[6];
 
     //Intialize flow

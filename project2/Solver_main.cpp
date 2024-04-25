@@ -76,6 +76,7 @@ int IterUpdate(int& ireact, int iter, int nelem,double& CFL, const double* res, 
 
 int solve(int& ireact, int nelem, double dx, double CFL, double pb, Chem &air, double* u0, double* u, double* xcc,
                       const double* Acc,const double* Afa,const double* dAdx) {
+
     //Solve the nonreacting / chemically frozen problem
 
     //Create some arrays

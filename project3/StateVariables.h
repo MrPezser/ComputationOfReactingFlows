@@ -16,7 +16,7 @@ private:
 
 public:
     double rho_mix{},a{},h0{}, rhol{}, rhov{}, hv{}, hl{}, dhT{}, dhp{}, drhoT{}, drhoP{};
-    //double rhoR{},rhoCv{};
+    double rhoR{},rhoCv{};
 
     State() = default;
 
@@ -43,10 +43,10 @@ public:
         rhov = p / (T*(y[0]*air.Rs[0] + y[1]*air.Rs[1] + y[2]*air.Rs[2]));
         rho_mix = 1.0 / ((Yv/rhov) + ((1.0-Yv)/rhol));
 
-        //rhoR = p/T;
-        //rhoCv = rhov * (y[0]*(air.Calc_cp_Curve(0,T)-air.Rs[0]) +
-        //                y[1]*(air.Calc_cp_Curve(1,T)-air.Rs[1]) +
-        //                y[2]*(air.Calc_cp_Curve(2,T)-air.Rs[2]));
+        rhoR = p/T;
+        rhoCv = rhov * (y[0]*(air.Calc_cp_Curve(0,T)-air.Rs[0]) +
+                        y[1]*(air.Calc_cp_Curve(1,T)-air.Rs[1]) +
+                        y[2]*(air.Calc_cp_Curve(2,T)-air.Rs[2]));
 
         hv = y[0]*air.Calc_h_Curve(0,T) + y[1]*air.Calc_h_Curve(1,T) + y[2]*air.Calc_h_Curve(2,T);
         hl = air.Calc_h_Curve(2,T) - air.HVAP;
@@ -56,7 +56,7 @@ public:
         hderivs(air);
         rhoderivs(air);
 
-        a = sqrt(rho_mix*dhT / ( rho_mix*(dhT*drhoP-drhoT*dhp) + drhoT));    //Wavespeed
+        a = sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));//sqrt(rho_mix*dhT / ( rho_mix*(dhT*drhoP-drhoT*dhp) + drhoT));    //Wavespeed
 
 
 
@@ -76,8 +76,6 @@ public:
         double Tnew = unk[5] + dT;
         double hnew = y[0]*air.Calc_h_Curve(0,Tnew) + y[1]*air.Calc_h_Curve(1,Tnew) + (1.0 + y[2])*air.Calc_h_Curve(2,Tnew) - air.HVAP;
         dhT = (hnew - (hv+hl)) / dT;
-
-        dhp = 0.0;
 
     }
 
