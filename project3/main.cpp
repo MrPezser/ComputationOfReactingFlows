@@ -57,7 +57,7 @@ int main() {
     yN20 = 0.7643;
     yRP0 = 0.0;
     Yv0 = 0.94;
-    dp0 = 20.0e-6;
+    dp0 = 5.0e-6;
 
     ///Mach number higher than prompt   |||   Temperature lower than prompt
 

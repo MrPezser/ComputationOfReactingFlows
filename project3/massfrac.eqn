@@ -1,0 +1,5 @@
+#!MC 1410
+$!AlterData 
+  Equation = '{Yl} = 1.0 - {Yv}'
+$!AlterData 
+  Equation = '{yRP} = 1.0 - {yO2v} - {yN2v} '

@@ -90,7 +90,7 @@ double VaporSource(const double A, const double* unk, State& var, Chem& air){
     DeltaU = K * unk[4];
 
     dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*var.rhol*unk[6]) );
-    if (dp < 1e-6) return 0.0;
+    if (dp < 1e-10) return 0.0;
 
     muv = (1.716e-5) * pow(T/273.15, 3.0/2.0) * ((273.15 + 110.4)/(T + 110.4));
     cpmix = unk[0]*air.Calc_cp_Curve(0,T) + unk[1]*air.Calc_cp_Curve(1,T) + (1.0-unk[0]-unk[1])*air.Calc_cp_Curve(2,T);
