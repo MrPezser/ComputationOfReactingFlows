@@ -5,7 +5,7 @@
 #include <valarray>
 #include "RHS.h"
 
-#define K  (0.0)
+#define K  (0.0)//(1.0)
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))
 
 void LDFSS(const double A, const double* uL, State& varL, const double* uR, State& varR, Chem &air, double* flux) {
@@ -87,10 +87,12 @@ double VaporSource(const double A, const double* unk, State& var, Chem& air){
     Pr = 0.7;
     Sc = 0.7;
 
-    DeltaU = K * unk[4];
+    DeltaU = K * fabs(unk[4]);
+
+    if (fabs(1.0 - unk[2]) < 1e-8) return 0.0;
 
     dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*var.rhol*unk[6]) );
-    if (dp < 1e-10) return 0.0;
+    //if (dp < 1e-10) return 0.0;
 
     muv = (1.716e-5) * pow(T/273.15, 3.0/2.0) * ((273.15 + 110.4)/(T + 110.4));
     cpmix = unk[0]*air.Calc_cp_Curve(0,T) + unk[1]*air.Calc_cp_Curve(1,T) + (1.0-unk[0]-unk[1])*air.Calc_cp_Curve(2,T);

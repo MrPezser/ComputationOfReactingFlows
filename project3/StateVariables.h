@@ -56,8 +56,8 @@ public:
         hderivs(air);
         rhoderivs(air);
 
-        a = sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));//sqrt(rho_mix*dhT / ( rho_mix*(dhT*drhoP-drhoT*dhp) + drhoT));    //Wavespeed
-
+        a =sqrt(rho_mix*dhT / ( rho_mix*(dhT*drhoP-drhoT*dhp) + drhoT));    //Wavespeed
+            // sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));
 
 
         ASSERT(!_isnan(a), "Failed to calculate sound speed!")
@@ -73,9 +73,13 @@ public:
 
         dhp = 0.0;
 
+        double Yv = unk[2];
+        double Yl = 1.0 - Yv;
+
         double Tnew = unk[5] + dT;
-        double hnew = y[0]*air.Calc_h_Curve(0,Tnew) + y[1]*air.Calc_h_Curve(1,Tnew) + (1.0 + y[2])*air.Calc_h_Curve(2,Tnew) - air.HVAP;
-        dhT = (hnew - (hv+hl)) / dT;
+        double hnew = Yv*(y[0]*air.Calc_h_Curve(0,Tnew) + y[1]*air.Calc_h_Curve(1,Tnew) + y[2]*air.Calc_h_Curve(2,Tnew))
+                        + Yl*(air.Calc_h_Curve(2,Tnew) - air.HVAP);
+        dhT = (hnew - (Yv*hv+Yl*hl)) / dT;
 
     }
 

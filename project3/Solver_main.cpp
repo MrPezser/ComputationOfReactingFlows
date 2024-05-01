@@ -208,6 +208,7 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
                     double rm = ElemVar[i].rho_mix;
                     double* unk = &(u[uIJK(i,0,0)]);
                     double dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*ElemVar[i].rhol*unk[6]) );
+                    if (_isnan(dp)) dp = 1e-6;
                     fprintf(fout,"%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",xcc[i],
                             unk[0], unk[1], unk[2], unk[3], unk[4], unk[5], unk[6],rm, unk[4]/ElemVar[i].a, dp);
                 }
