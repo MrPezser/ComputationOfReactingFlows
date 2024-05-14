@@ -76,8 +76,9 @@ c --------------------------------------------------------------------
     flux[2] = fml*YvL     + fmr*YvR;
     flux[3] = fml         + fmr;
     flux[4] = fml*uL[4]   + fmr*uR[4] + A*pnet;    //momentum
-    flux[5] = fml*varL.h0 + fmr*varR.h0;              //total energy
+    flux[5] = fml*varL.h0 + fmr*varR.h0;           //total energy
     flux[6] = fml*uL[6]   + fmr*uR[6];
+    flux[7] = fml*uL[7]   + fmr*uR[7];
 }
 
 double VaporSource(const double A, const double* unk, State& var, Chem& air){
@@ -87,7 +88,7 @@ double VaporSource(const double A, const double* unk, State& var, Chem& air){
     Pr = 0.7;
     Sc = 0.7;
 
-    DeltaU = K * fabs(unk[4]);
+    DeltaU = 0.0*unk[7];//K * fabs(unk[4]);
 
     if (fabs(1.0 - unk[2]) < 1e-8) return 0.0;
 
@@ -113,6 +114,36 @@ void PressureBC(double pb, const double* u, double* uGhost){
     }
     uGhost[3] = pb;
 
+}
+
+double RelVelSource(double* A, const double dx, const double* uplus, const double* umins, const double* unk,
+                    State& varplus, State& varmins,State& var, Chem& air){
+    //Calculate the relative velocity source tern
+    double Sout{}, sigma;
+
+    sigma = 0.5;
+
+    //Crude Upwindng
+    int ia = 0;
+    if (unk[4] > 0.0){
+        umins = unk;
+    } else {
+        if(unk[4] < 0.0) {
+            uplus = unk;
+            ia = 1;
+        }
+    }
+
+    alpha1_plus =
+
+    Sout = (1.0 / A[1]) * var.rho_mix * unk[7] +
+            ((A[ia+1]*uplus[4] + 1.0 - 2.0*uplus[2]) - (A[ia]*umins[4] + 1.0 - 2.0*umins[2]) )/dx;
+
+    Sout += -unk[7]*unk[7]*(uplus[3] - umins[3])/dx;
+    Sout += -sigma*(var.rho_mix/rho_tilde)*unk[7]*unk[7]*(alpha1_plus - alpha1_mins)/dx;
+
+    Sout *= A[1]*var.rho_mix;
+    return Sout;
 }
 
 void CalcRes(int isource, int nelem, double dx, double CFL, double pb, Chem &air, State* ElemVar, double* u0, double* u,
