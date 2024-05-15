@@ -8,7 +8,8 @@
 #define K  (0.0)//(1.0)
 #define sign(x)  ((std::signbit(x) ?  -1 : 1))
 
-void LDFSS(const double A, const double* uL, State& varL, const double* uR, State& varR, Chem &air, double* flux) {
+void LDFSS(const double A, const double* uL, State& varL, const double* uR, State& varR, Chem &air, double* flux,
+           double* altflux) {
     /*
 c --------------------------------------------------------------------
 c ----- inviscid flux contribution (LDFSS)
@@ -79,6 +80,23 @@ c --------------------------------------------------------------------
     flux[5] = fml*varL.h0 + fmr*varR.h0;           //total energy
     flux[6] = fml*uL[6]   + fmr*uR[6];
     flux[7] = fml*uL[7]   + fmr*uR[7];
+
+    //derivatives needed for the relative velocity equation
+    //currently trying out upwindng massflux weighted averages
+    double fmtot = fml+fmr;
+    //flux contribution to dA*u~/dx
+    altflux[0] = (fml*(uL[4] + (1.0 - 2.0*uL[2])*uL[7])
+                + fmr*(uR[4] + (1.0 - 2.0*uR[2])*uR[7])) / fmtot;
+
+    //flux contribution to dY2/dx
+    altflux[1] = (fml*(1.0 - uL[2]) + fmr*(1.0 - uR[2])) / fmtot;
+
+    //flux contribution to d alpha1 dx
+    altflux[2] = (fml*() + fmr*()) / fmtot;
+
+    //flux contribution to dp / dx
+    altflux[3] = pnet;
+
 }
 
 double VaporSource(const double A, const double* unk, State& var, Chem& air){
