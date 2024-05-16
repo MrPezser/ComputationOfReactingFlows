@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include "LinearSolve.h"
+#include "Indexing.h"
 
 
 
@@ -61,8 +62,9 @@ int LUPDecompose(double **A, int N, double Tol, int *P) {
         for (j = i + 1; j < N; j++) {
             A[j][i] /= A[i][i];
 
-            for (k = i + 1; k < N; k++)
+            for (k = i + 1; k < N; k++) {
                 A[j][k] -= A[j][i] * A[i][k];
+            }
         }
     }
 
@@ -73,8 +75,15 @@ int LUPDecompose(double **A, int N, double Tol, int *P) {
  * OUTPUT: x - solution vector of A*x=b
  */
 void LUPSolve(double **A, int *P, double *b, int N, double *x) {
+    //Check for valid inputs
+    for (int i=0; i<N ;i++){
+        ASSERTVEC(!_isnan(b[i]), "NaN RHS to LU Solve", i)
+        ASSERTVEC(!std::isinf(b[i]), "INF RHS to LU Solve", i)
+    }
+
 
     for (int i = 0; i < N; i++) {
+
         x[i] = b[P[i]];
 
         for (int k = 0; k < i; k++)

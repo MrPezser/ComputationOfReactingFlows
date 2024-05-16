@@ -62,4 +62,5 @@ CMakeFiles/project3.dir/LinearSolve.cpp.obj: \
  C:/PROGRA~1/JETBRA~1/CLION2~1.3/bin/mingw/x86_64-w64-mingw32/include/swprintf.inl \
  C:/PROGRA~1/JETBRA~1/CLION2~1.3/bin/mingw/x86_64-w64-mingw32/include/sec_api/stdio_s.h \
  C:/PROGRA~1/JETBRA~1/CLION2~1.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cstdlib \
- C:\Users\tskoepli\Documents\GitHub\ComputationOfReactingFlows\project3\LinearSolve.h
+ C:\Users\tskoepli\Documents\GitHub\ComputationOfReactingFlows\project3\LinearSolve.h \
+ C:\Users\tskoepli\Documents\GitHub\ComputationOfReactingFlows\project3\Indexing.h

@@ -25,8 +25,11 @@ void ResNorm(int nelem, const double* res, double* resout) {
     for (int ivar=0; ivar<NVAR; ivar++){
         resout[ivar] = sqrt(ressum[ivar]);
     }
-    if (resout[6] < 1e-10){
+    if (resout[6] < RESTOL*RESTOL){
         resout[6] = RESTOL*RESTOL;
+    }
+    if (resout[7] < RESTOL*RESTOL){
+        resout[7] = RESTOL*RESTOL;
     }
 }
 
@@ -42,7 +45,7 @@ int IterUpdate(int& isource, int iter, int nelem,double& CFL, const double* res,
         res0[2] = ressum[2];
     }*/
 
-    for (int ivar=0; ivar<NVAR; ivar++) {
+    for (int ivar=0; ivar<(NVAR-2)+(2*isource); ivar++) {
         resnorm +=  ressum[ivar]/ res0[ivar];
     }
 
@@ -60,8 +63,8 @@ int IterUpdate(int& isource, int iter, int nelem,double& CFL, const double* res,
             ressum[iv] = sqrt(ressum[iv]);
             maxres = fmax(maxres, ressum[iv]);
         }
-        printf("\t\tRes:%8.1e %8.1e %8.1e %8.1e %8.1e %8.1e %8.1e ",
-               ressum[0],ressum[1],ressum[2],ressum[3],ressum[4],ressum[5],ressum[6]);
+        printf("\t\tRes:%8.1e %8.1e %8.1e %8.1e %8.1e %8.1e %8.1e %8.1e ",
+               ressum[0],ressum[1],ressum[2],ressum[3],ressum[4],ressum[5],ressum[6],ressum[7]);
     }
     printf("\n");
 
@@ -74,8 +77,7 @@ int IterUpdate(int& isource, int iter, int nelem,double& CFL, const double* res,
             CFL = CFL*CFLTCNE;
             //return 1;///ONLY DO FULLY FROZEN FLOW
             printf("ENABLING MULTIPHASE SOURCE TERMS\n");
-        }
-         */
+        }*/
         return 0;
     }
 }
@@ -110,7 +112,8 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
         printf("~~~~~~~~~ Failed to save residual file, error:%d\n", errno);}
     else {
         fprintf(fres, "Residual history\n");
-        fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n",0,1.0,1.0,1.0,1.0,1.0,1.0,1.0);
+        fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n",
+                0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0);
     }
 
     for (int iter=0; iter<MXITER; iter++){
@@ -144,6 +147,7 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
             int P[NVAR+1]{}; //permutation vector for pivoting
             int N = NVAR;
             dt = dx*CFL/(ElemVar[ielem].a + fabs(unk[4]));
+            //ASSERT(dt>0.0 and !_isnan(dt),"Error Calculating Timestep")
 
             //Evaluate the jacobian / Implicit matrix
             BuildJacobian(isource, dt, unk, air, ElemVar[ielem], D);
@@ -178,20 +182,33 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
             ui[5] = fmax(ui[5], 201);
             ui[5] = fmin(ui[5], 6001);
 
+            //Drift Velocity limiting
+            //ui[7] = fmin(ui[7], fabs(u[4]));
+            //ui[7] = fmax(ui[7], -fabs(u[4]));
+
+            //Check bounds
+            ASSERT((fabs(ui[0]+ui[1]) <= 1.0) , "Vapor species massfrac failed conservation")
+            ASSERT(ui[2] <= 1.5 and ui[2] >= 0.0, "Phase massfrac failed conservation")
+            ASSERT(ui[6] > 0.0, "Negative droplet number density?")
+
         }
 
         //Save to residual log file
         double ressum[NVAR];
         ResNorm(nelem, res, ressum);
         if ( res0[2] > 1e-16) {
-            fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n", iter+1, ressum[0] / res0[0], ressum[1] / res0[1],
-                    ressum[2] / res0[2], ressum[3] / res0[3], ressum[4] / res0[4], ressum[5] / res0[5], ressum[6] / res0[6]);
+            fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n", iter+1,
+                    ressum[0] / res0[0], ressum[1] / res0[1], ressum[2] / res0[2], ressum[3] / res0[3],
+                    ressum[4] / res0[4], ressum[5] / res0[5], ressum[6] / res0[6], ressum[7] / res0[7]);
         } else {
-            fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n", iter+1, ressum[0] / res0[0], ressum[1] / res0[1],
-                    1.0, ressum[3] / res0[3], ressum[4] / res0[4], ressum[5] / res0[5], ressum[6] / res0[6]);
+            fprintf(fres, "%d,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le,\t%le\n", iter+1,
+                    ressum[0] / res0[0], ressum[1] / res0[1], 1.0, ressum[3] / res0[3], ressum[4] / res0[4],
+                    ressum[5] / res0[5], ressum[6] / res0[6], ressum[7] / res0[7]);
         }
+
+
         //Printout Solution and residual
-        if (iter%500 == 0) {
+        if (iter%(1000) == 0) {
             iconv = IterUpdate(isource, iter, nelem, CFL, res, res0);
 
             //save soln file
@@ -201,16 +218,17 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
             else {
                 fprintf(fout, "TITLE = \"%s\"\n", "title");
                 fprintf(fout, "VARIABLES = \"X\",\"yO2v\",\"yN2v\",\"Yv\",\"P\",\"u\","
-                              "\"T\",\"n_tilde\",\"rho_mix\",\"Mach\",\"dp\"\n");
+                              "\"T\",\"n_tilde\",\"delta_u\",\"rho_mix\",\"Mach\",\"dp\"\n");
                 fprintf(fout, "ZONE I=%d, DATAPACKING=POINT\n", nelem);
 
                 for (int i=0; i<nelem; i++) {
                     double rm = ElemVar[i].rho_mix;
                     double* unk = &(u[uIJK(i,0,0)]);
-                    double dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*ElemVar[i].rhol*unk[6]) );
-                    if (_isnan(dp)) dp = 1e-6;
-                    fprintf(fout,"%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",xcc[i],
-                            unk[0], unk[1], unk[2], unk[3], unk[4], unk[5], unk[6],rm, unk[4]/ElemVar[i].a, dp);
+                    //double dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*ElemVar[i].rhol*unk[6]) );
+                    //if (_isnan(dp)) dp = 1e-6;
+                    fprintf(fout,"%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",xcc[i],
+                            unk[0], unk[1], unk[2], unk[3], unk[4], unk[5], unk[6], unk[7],rm, unk[4]/ElemVar[i].a,
+                            ElemVar[i].dp);
                 }
             }
             fclose(fout);

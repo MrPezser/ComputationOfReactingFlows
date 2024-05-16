@@ -42,14 +42,14 @@ int main() {
     double CFL;
     double pb_ratio, pb;
 
-    nelem = 150;
+    nelem = 300;
     CFL = 0.4;
     pb_ratio = 10.0;
     isource = 1;
 
     ///MAKE SURE THAT THERE IS CONSISTENCE AMONG THE INDEXING FOR DIFFEREENT FACE-VALUED VARIABLES/ARRAYS
     Chem air = Chem();
-    double M0, p0, T0, yO20, yN20, yRP0, Yv0, dp0;
+    double M0, p0, T0, yO20, yN20, yRP0, Yv0, dp0, deltau0;
     //Initial state as given
     M0 = 2.5;
     p0 = 102325.0;
@@ -58,6 +58,7 @@ int main() {
     yRP0 = 0.0;
     Yv0 = 0.94;
     dp0 = 20.0e-6;
+    deltau0 = 0.0;
 
     ///Mach number higher than prompt   |||   Temperature lower than prompt
 
@@ -96,9 +97,10 @@ int main() {
     u0[1] = yN20;       // same for N2
     u0[2] = Yv0;        //Fraction of mas which is vapor
     u0[3] = p0;         //pressure
-    u0[4] = M0 * 300.0;    //velocity placeholder
+    u0[4] = M0 * 300.0; //velocity placeholder
     u0[5] = T0;         //Temperature
     u0[6] = 6.0*(1.0-Yv0) / (M_PI*rhol*dp0*dp0*dp0);         //Number density
+    u0[7] = deltau0;    // initial drift velocity
 
     State var;
     var.Initialize(u0);
@@ -119,6 +121,7 @@ int main() {
     u0back[4] = u0[4]/u_shock;
     u0back[5] = u0[5]*T_shock;
     u0back[6] = u0[6];
+    u0back[7] = u0[7];
 
     //Intialize flow
     auto u = (double*)malloc(nelem*NDEGR*(NVAR)*sizeof(double));
@@ -133,17 +136,21 @@ int main() {
                 } else {                //Post-Shock conditions
                     u[uIJK(ielem, jdegr, kvar)] = u0back[kvar];
                 }
+
+                if (kvar==7){
+                    u[uIJK(ielem, jdegr, kvar)] = 1e-2;
+                }
             }
         }
     }
-    //restart(nelem,u);
+    restart(nelem,u);
 
     int success = solve(isource, nelem, dx, CFL, pb, air, u0, u, xcc, Acc, Afa, dAdx);
 
 
 
     if (!success){
-        printf("WRONG! Try again but don't code any bugs this time idiot...\n");
+        printf("WRONG! Try again but do it right this time idiot...\n");
     }
 
     return 0;

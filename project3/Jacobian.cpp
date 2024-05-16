@@ -22,12 +22,11 @@ void BuildJacobian(int isource, double dt, const double* unk, Chem &air, State& 
 
     //      d__/d(yv1)
     D[0][0] =  dti * var.rho_mix*Yv;
-    /// ADD d_rho/d_yv1 TERM
+    /// ADD d_rho/d_yv1 TERMS
 
     // d__/d(yv2)
     D[1][1] =  dti * var.rho_mix*Yv;
-
-    /// ADD d_rho/d_yv2 TERM
+    /// ADD d_rho/d_yv2 TERMS
 
     //      d__/d(Yv)
     double drhodYv = -var.rho_mix*var.rho_mix * (1.0/var.rhov - 1.0/var.rhol);
@@ -50,6 +49,7 @@ void BuildJacobian(int isource, double dt, const double* unk, Chem &air, State& 
     D[4][3] = dti * (var.drhoP * unk[4]);
     D[5][3] = dti * (var.drhoP * var.h0 - 1.0);
     D[6][3] = dti * (var.drhoP * unk[6]);
+    D[7][3] = dti * (var.drhoP * unk[7]);
 
     //      d/d(u)
     D[4][4] = dti * (var.rho_mix);
@@ -63,6 +63,7 @@ void BuildJacobian(int isource, double dt, const double* unk, Chem &air, State& 
     D[4][5] = dti * (var.drhoT * unk[4]);
     D[5][5] = dti * (var.drhoT * var.h0 + var.rho_mix*var.dhT - unk[3]/unk[5]); /// try adding this: dp/dT = P/T = u3/u5
     D[6][5] = dti * (var.drhoT * unk[6]);
+    D[7][5] = dti * (var.drhoT * unk[7]);
 
     //      d/d(ntilde)
     D[6][6] = dti * var.rho_mix;
@@ -72,7 +73,8 @@ void BuildJacobian(int isource, double dt, const double* unk, Chem &air, State& 
 
     for (int i=0; i<NVAR; i++){
         for (int j=0; j<NVAR; j++){
-            ASSERT((!_isnan(D[i][j])), "NaN Jacobian")
+            ASSERT((!_isnan(D[i][j])),      "NaN Jacobian")
+            ASSERT(!std::isinf(D[i][j]), "INF Jacobian")
         }
         /*
         if (D[i][i] <= 0.0){

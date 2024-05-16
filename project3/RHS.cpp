@@ -92,7 +92,10 @@ c --------------------------------------------------------------------
     altflux[1] = (fml*(1.0 - uL[2]) + fmr*(1.0 - uR[2])) / fmtot;
 
     //flux contribution to d alpha1 dx
-    altflux[2] = (fml*() + fmr*()) / fmtot;
+    double alpha1L, alpha1R;
+    alpha1L = uL[2]*varL.rho_mix/varL.rhov;
+    alpha1R = uR[2]*varR.rho_mix/varR.rhov;
+    altflux[2] = (fml*alpha1L + fmr*alpha1R) / fmtot;
 
     //flux contribution to dp / dx
     altflux[3] = pnet;
@@ -106,19 +109,20 @@ double VaporSource(const double A, const double* unk, State& var, Chem& air){
     Pr = 0.7;
     Sc = 0.7;
 
-    DeltaU = 0.0*unk[7];//K * fabs(unk[4]);
+    DeltaU = 0.0;//fabs(unk[7]);//K * fabs(unk[4]);
 
     if (fabs(1.0 - unk[2]) < 1e-8) return 0.0;
 
-    dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*var.rhol*unk[6]) );
+    dp = var.dp;//cbrt( 6.0*(1.0 - unk[2])/(M_PI*var.rhol*unk[6]) );
     //if (dp < 1e-10) return 0.0;
 
     muv = (1.716e-5) * pow(T/273.15, 3.0/2.0) * ((273.15 + 110.4)/(T + 110.4));
     cpmix = unk[0]*air.Calc_cp_Curve(0,T) + unk[1]*air.Calc_cp_Curve(1,T) + (1.0-unk[0]-unk[1])*air.Calc_cp_Curve(2,T);
     Re = (var.rhov * DeltaU * dp) / muv;
     Sh = 2.0 + 0.552*sqrt(Re)* cbrt(Sc);
-    Bvap = cpmix * fmax(0, T-444.0) / air.HVAP;
-    Sv = 2.0 * M_PI * var.rho_mix * unk[6] * dp * Sh * (muv/Pr) * log(1 + Bvap);
+    Bvap = cpmix * fmax(0.0, T-444.0) / air.HVAP;
+    Sv = 2.0 * M_PI * var.rho_mix * unk[6] * dp * Sh * (muv/Pr) * log(1.0 + Bvap);
+
     ASSERT(!_isnan(Sv),"NaN source term")
 
     return A * Sv;
@@ -131,36 +135,53 @@ void PressureBC(double pb, const double* u, double* uGhost){
         uGhost[kv] = u[kv];
     }
     uGhost[3] = pb;
+    uGhost[7] = 0.0; //assume phase velo equilib
 
 }
 
-double RelVelSource(double* A, const double dx, const double* uplus, const double* umins, const double* unk,
-                    State& varplus, State& varmins,State& var, Chem& air){
+double RelVelSource(int ielem, double A, const double dx, const double* unk, State& var, double* altflux, Chem& air){
     //Calculate the relative velocity source tern
-    double Sout{}, sigma;
+    double Sout{}, sigma, CD;
 
-    sigma = 0.5;
+    sigma = 0.2;//1.5;
+    CD = 10.0; ///FIND A BETER VALUE USING REF (LEC NOTES)
 
-    //Crude Upwindng
-    int ia = 0;
-    if (unk[4] > 0.0){
-        umins = unk;
-    } else {
-        if(unk[4] < 0.0) {
-            uplus = unk;
-            ia = 1;
-        }
-    }
+    //Calculated needed derivatives using the alt flux
+    double dutilde, dYl, dalpha1, dpress;
+    dutilde = (altflux[IJ(ielem+1,0,NALTF)] - altflux[IJ(ielem,0,NALTF)]) / dx;
+    dYl     = (altflux[IJ(ielem+1,1,NALTF)] - altflux[IJ(ielem,1,NALTF)]) / dx;
+    dalpha1 = (altflux[IJ(ielem+1,2,NALTF)] - altflux[IJ(ielem,2,NALTF)]) / dx;
+    dpress  = (altflux[IJ(ielem+1,3,NALTF)] - altflux[IJ(ielem,3,NALTF)]) / dx;
 
-    alpha1_plus =
+    //Other needed calculations
+    double rho_tilde;
+    rho_tilde = var.rhol*(     unk[2] *var.rho_mix/var.rhov)
+              + var.rhov*((1.0-unk[2])*var.rho_mix/var.rhol);
 
-    Sout = (1.0 / A[1]) * var.rho_mix * unk[7] +
-            ((A[ia+1]*uplus[4] + 1.0 - 2.0*uplus[2]) - (A[ia]*umins[4] + 1.0 - 2.0*umins[2]) )/dx;
 
-    Sout += -unk[7]*unk[7]*(uplus[3] - umins[3])/dx;
-    Sout += -sigma*(var.rho_mix/rho_tilde)*unk[7]*unk[7]*(alpha1_plus - alpha1_mins)/dx;
+    //Assemble the completed source term
+    Sout = 0.0;
+    //  extra term to get eqn in conservative form, effect of some sort of modified bulk velocity
+    Sout += -unk[7] * dutilde;
 
-    Sout *= A[1]*var.rho_mix;
+    //  extra term which relates to the change in species mass fraction
+    Sout +=  unk[7]*unk[7]*dYl;
+
+    //  Interfce pressure term similar to above, needed for hyperbolicity
+    Sout += -sigma*(var.rho_mix/rho_tilde)*unk[7]*unk[7]*dalpha1;
+
+    //  Drag term to relax velocities to bulk vel
+    double dp_eff = fmax(var.dp, 1e-16);
+    Sout += -CD*(var.rho_mix/rho_tilde)*fabs(unk[7])*unk[7] / dp_eff;
+
+    //  Source term to generate the differences based on the different phases being accelerated differently
+    Sout += -((var.rhol - var.rhov)/(var.rhov*var.rhol)) * dpress;
+
+    Sout *=  A*var.rho_mix;
+
+    ASSERT(!_isnan(Sout),"NaN Drift Source")
+    ASSERT(!std::isinf(Sout),"INF Drift Source")
+
     return Sout;
 }
 
@@ -168,8 +189,9 @@ void CalcRes(int isource, int nelem, double dx, double CFL, double pb, Chem &air
              const double* Acc, const double* Afa, const double* dAdx, double* res) {
     //Find the common flux at each face
     double flux_comm[(nelem+1)*(NVAR)], uBack[NVAR];
+    double relvel_flux_extras[(nelem+1)*(NALTF)];
     double src{};
-    double *uL, *uR, *flux;
+    double *uL, *uR, *flux, *altflux;
     State varL, varR;
 
     for (int iu=0; iu<nelem*(NVAR)*NDEGR; iu++) {
@@ -185,8 +207,9 @@ void CalcRes(int isource, int nelem, double dx, double CFL, double pb, Chem &air
         varR = ElemVar[iface];
 
         flux = &flux_comm[fIJ(iface, 0)];
+        altflux = &relvel_flux_extras[IJ(iface,0,NALTF)];
 
-        LDFSS(Afa[iface], uL, varL, uR, varR, air, flux);
+        LDFSS(Afa[iface], uL, varL, uR, varR, air, flux, altflux);
     }
     //Boundary faces - pressure BC outflow
 
@@ -198,7 +221,8 @@ void CalcRes(int isource, int nelem, double dx, double CFL, double pb, Chem &air
     varR = ElemVar[0];
 
     flux = &flux_comm[fIJ(0, 0)];
-    LDFSS(Afa[0], uL, varL, uR, varR, air, flux);
+    altflux = &relvel_flux_extras[IJ(0,0,NALTF)];
+    LDFSS(Afa[0], uL, varL, uR, varR, air, flux, altflux);
 
     //Outflow
     uL = &(u[uIJK(nelem - 1, 0, 0)]);
@@ -210,7 +234,8 @@ void CalcRes(int isource, int nelem, double dx, double CFL, double pb, Chem &air
     varR.UpdateState(air, isource);
 
     flux = &flux_comm[fIJ(nelem, 0)];
-    LDFSS(Afa[nelem], uL, varL, uR, varR, air, flux);
+    altflux = &relvel_flux_extras[IJ(nelem,0,NALTF)];
+    LDFSS(Afa[nelem], uL, varL, uR, varR, air, flux, altflux);
 
 
     //Calculate RHS residual from flux differencing and source terms
@@ -218,22 +243,27 @@ void CalcRes(int isource, int nelem, double dx, double CFL, double pb, Chem &air
     //TNERelaxation(nelem, air, ElemVar, u, tne_src);
 
     for (int ielem=0; ielem<nelem; ielem++) {
-        int id = uIJK(ielem,0,0);
-        double* ui = &(u[id]);
-        //State var = ElemVar[ielem];
+        int id = uIJK(ielem, 0, 0);
+        double *ui = &(u[id]);
+        State var = ElemVar[ielem];
 
         //Flux
-        for (int kvar=0; kvar<(NVAR); kvar++){
-            int idk = id+kvar;
-            res[idk] = -(flux_comm[uIJK(ielem+1,0,kvar)] - flux_comm[idk]) / dx;
+        for (int kvar = 0; kvar < (NVAR); kvar++) {
+            int idk = id + kvar;
+            res[idk] = -(flux_comm[uIJK(ielem + 1, 0, kvar)] - flux_comm[idk]) / dx;
         }
         //Pressure source term
-        res[id+4] += ui[3]*(Afa[ielem+1] - Afa[ielem])/dx; // dAdx[ielem];
+        res[id + 4] += ui[3] * (Afa[ielem + 1] - Afa[ielem]) / dx; // dAdx[ielem];
 
         //vapor source term
+        res[id + 2] += VaporSource(Acc[ielem], ui, ElemVar[ielem], air);
         if (isource == 1) {
-            res[id + 2] += VaporSource(Acc[ielem], ui, ElemVar[ielem], air);
+            res[id + 7] += RelVelSource(ielem, Acc[ielem], dx, ui, var, relvel_flux_extras, air);
         }
 
+        for (int kvar = 0; kvar < (NVAR); kvar++) {
+            ASSERTVEC(!_isnan(res[id+kvar]), "NaN residual element", kvar)
+            ASSERTVEC(!std::isinf(res[id+kvar]), "NaN residual element", kvar)
+        }
     }
 }

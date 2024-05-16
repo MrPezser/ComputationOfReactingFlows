@@ -15,7 +15,7 @@ private:
     double* unk{};
 
 public:
-    double rho_mix{},a{},h0{}, rhol{}, rhov{}, hv{}, hl{}, dhT{}, dhp{}, drhoT{}, drhoP{};
+    double rho_mix{},a{},h0{}, rhol{}, rhov{}, hv{}, hl{}, dhT{}, dhp{}, drhoT{}, drhoP{}, dp{};
     double rhoR{},rhoCv{};
 
     State() = default;
@@ -59,6 +59,8 @@ public:
         a =sqrt(rho_mix*dhT / ( rho_mix*(dhT*drhoP-drhoT*dhp) + drhoT));    //Wavespeed
             // sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));
 
+        dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*rhol*unk[6]) );
+        dp = fmax(1e-10, dp);
 
         ASSERT(!_isnan(a), "Failed to calculate sound speed!")
     }
