@@ -109,7 +109,7 @@ double VaporSource(const double A, const double* unk, State& var, Chem& air){
     Pr = 0.7;
     Sc = 0.7;
 
-    DeltaU = 0.0;//fabs(unk[7]);//K * fabs(unk[4]);
+    DeltaU = fabs(unk[7]);//K * fabs(unk[4]);
 
     if (fabs(1.0 - unk[2]) < 1e-8) return 0.0;
 
@@ -123,7 +123,7 @@ double VaporSource(const double A, const double* unk, State& var, Chem& air){
     Bvap = cpmix * fmax(0.0, T-444.0) / air.HVAP;
     Sv = 2.0 * M_PI * var.rho_mix * unk[6] * dp * Sh * (muv/Pr) * log(1.0 + Bvap);
 
-    ASSERT(!_isnan(Sv),"NaN source term")
+    ASSERT((!_isnan(Sv)),"NaN source term")
 
     return A * Sv;
 
@@ -143,7 +143,7 @@ double RelVelSource(int ielem, double A, const double dx, const double* unk, Sta
     //Calculate the relative velocity source tern
     double Sout{}, sigma, CD;
 
-    sigma = 0.2;//1.5;
+    sigma = 0.0;//1.5;
     CD = 10.0; ///FIND A BETER VALUE USING REF (LEC NOTES)
 
     //Calculated needed derivatives using the alt flux
@@ -171,8 +171,7 @@ double RelVelSource(int ielem, double A, const double dx, const double* unk, Sta
     Sout += -sigma*(var.rho_mix/rho_tilde)*unk[7]*unk[7]*dalpha1;
 
     //  Drag term to relax velocities to bulk vel
-    double dp_eff = fmax(var.dp, 1e-16);
-    Sout += -CD*(var.rho_mix/rho_tilde)*fabs(unk[7])*unk[7] / dp_eff;
+    Sout += -CD*(var.rho_mix/rho_tilde)*fabs(unk[7])*unk[7] / var.dp;
 
     //  Source term to generate the differences based on the different phases being accelerated differently
     Sout += -((var.rhol - var.rhov)/(var.rhov*var.rhol)) * dpress;

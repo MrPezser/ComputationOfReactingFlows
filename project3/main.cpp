@@ -19,7 +19,7 @@ double area_slope(const double x){
 }
 
 void restart(int nelem, double* u){
-    FILE* frst = fopen("restart.dat","r"); //restart_therm_equlib.dat | restart_good.dat
+    FILE* frst = fopen("restart_decoupled.dat","r"); //restart_therm_equlib.dat | restart_good.dat
     if (frst==nullptr) {
         printf("No restart file found.\n");
         return;
@@ -43,7 +43,7 @@ int main() {
     double pb_ratio, pb;
 
     nelem = 300;
-    CFL = 0.4;
+    CFL = 0.05;//0.4;
     pb_ratio = 10.0;
     isource = 1;
 
@@ -138,6 +138,7 @@ int main() {
                 }
 
                 if (kvar==7){
+                    //add intial drif velocity for when testing non-pressure terms
                     u[uIJK(ielem, jdegr, kvar)] = 1e-2;
                 }
             }

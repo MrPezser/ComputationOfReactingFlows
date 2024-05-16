@@ -60,7 +60,7 @@ public:
             // sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));
 
         dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*rhol*unk[6]) );
-        dp = fmax(1e-10, dp);
+        dp = fmax(1e-8, dp);
 
         ASSERT(!_isnan(a), "Failed to calculate sound speed!")
     }
