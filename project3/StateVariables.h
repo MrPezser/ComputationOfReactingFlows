@@ -15,7 +15,7 @@ private:
     double* unk{};
 
 public:
-    double rho_mix{},a{},h0{}, rhol{}, rhov{}, hv{}, hl{}, dhT{}, dhp{}, drhoT{}, drhoP{}, dp{};
+    double rho_mix{},a{},h0{}, mu{}, rhol{}, rhov{}, hv{}, hl{}, dhT{}, dhp{}, drhoT{}, drhoP{}, dp{};
     double rhoR{},rhoCv{};
 
     State() = default;
@@ -60,7 +60,13 @@ public:
             // sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));
 
         dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*rhol*unk[6]) );
-        dp = fmax(1e-8, dp);
+        dp = fmax(1e-7, dp);
+
+        //Sutherland's law for viscosity of gaseous air
+        double S, C1;
+        S = 110.4;
+        C1 = 1.458e-6;
+        mu = C1 * pow(T, 1.5) / (T + S);
 
         ASSERT(!_isnan(a), "Failed to calculate sound speed!")
     }
@@ -111,7 +117,6 @@ public:
         drhoP = (rho_mixnew - rho_mix) / dp;
 
 
-        /// INCORRECT drhoP = -rho_mix*rho_mix*((-Yv/rhov*rhov)*(rhov/p) + (1.0-Yv)/(-rhol*rhol*air.AREF*air.AREF) );
     }
 
 };

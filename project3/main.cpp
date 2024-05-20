@@ -43,7 +43,7 @@ int main() {
     double pb_ratio, pb;
 
     nelem = 300;
-    CFL = 0.05;//0.4;
+    CFL = 0.003;//0.4;
     pb_ratio = 10.0;
     isource = 1;
 

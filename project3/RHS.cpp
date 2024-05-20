@@ -143,8 +143,8 @@ double RelVelSource(int ielem, double A, const double dx, const double* unk, Sta
     //Calculate the relative velocity source tern
     double Sout{}, sigma, CD;
 
-    sigma = 0.0;//1.5;
-    CD = 10.0; ///FIND A BETER VALUE USING REF (LEC NOTES)
+    sigma = 0.15;
+    //CD = 10.0;
 
     //Calculated needed derivatives using the alt flux
     double dutilde, dYl, dalpha1, dpress;
@@ -154,13 +154,25 @@ double RelVelSource(int ielem, double A, const double dx, const double* unk, Sta
     dpress  = (altflux[IJ(ielem+1,3,NALTF)] - altflux[IJ(ielem,3,NALTF)]) / dx;
 
     //Other needed calculations
-    double rho_tilde;
+    double rho_tilde, alpha1, REdrop;
     rho_tilde = var.rhol*(     unk[2] *var.rho_mix/var.rhov)
               + var.rhov*((1.0-unk[2])*var.rho_mix/var.rhol);
+    alpha1 = unk[2] * var.rho_mix / var.rhov;
+    //REdrop = fmin(var.rhov*alpha1*var.dp*fabs(unk[7])/var.mu, 1000.0);
+    //CD = (24.0/REdrop)*(1.0 + 0.15*pow(REdrop,0.634))*pow(alpha1,-2.65);
+    //CD = fmin(CD,1e4);
 
+    REdrop =var.rhov * alpha1 * var.dp * fabs(unk[7]) / var.mu;
+    REdrop = fmax(REdrop, 1e-6);
+    double corr = (1.0 + 0.15*pow(fmin(REdrop,1000.0),0.687))*pow(alpha1,-3.65);
+    CD = (24.0/fmin(REdrop,1000.0))*corr;
+    //printf("CD:%f\n",CD);
+    ASSERT(CD > 0.0, "negative drag coefficient");
 
+    //printf("CD:%f\n",CD);
     //Assemble the completed source term
     Sout = 0.0;
+
     //  extra term to get eqn in conservative form, effect of some sort of modified bulk velocity
     Sout += -unk[7] * dutilde;
 
@@ -171,7 +183,7 @@ double RelVelSource(int ielem, double A, const double dx, const double* unk, Sta
     Sout += -sigma*(var.rho_mix/rho_tilde)*unk[7]*unk[7]*dalpha1;
 
     //  Drag term to relax velocities to bulk vel
-    Sout += -CD*(var.rho_mix/rho_tilde)*fabs(unk[7])*unk[7] / var.dp;
+    Sout += -0.75*CD*(var.rho_mix/rho_tilde)*fabs(unk[7])*unk[7] / var.dp;
 
     //  Source term to generate the differences based on the different phases being accelerated differently
     Sout += -((var.rhol - var.rhov)/(var.rhov*var.rhol)) * dpress;
