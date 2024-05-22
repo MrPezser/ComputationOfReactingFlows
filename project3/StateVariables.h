@@ -15,7 +15,8 @@ private:
     double* unk{};
 
 public:
-    double rho_mix{},a{},h0{}, mu{}, rhol{}, rhov{}, hv{}, hl{}, dhT{}, dhp{}, drhoT{}, drhoP{}, dp{};
+    double rho_mix{},a{},h0{}, mu{}, rhol{}, rhov{}, hv{}, hl{}, dhT{}, dhp{},
+    drhoT{}, drhoP{}, dp{}, drhoyvn2{}, drhoyvo2{}, dhyvo2{}, dhyvn2{};
     double rhoR{},rhoCv{};
 
     State() = default;
@@ -60,13 +61,10 @@ public:
             // sqrt((p/rho_mix)*(1.0 + rhoR/rhoCv));
 
         dp = cbrt( 6.0*(1.0 - unk[2])/(M_PI*rhol*unk[6]) );
-        dp = fmax(1e-7, dp);
+        dp = fmax(0.0,dp);
 
-        //Sutherland's law for viscosity of gaseous air
-        double S, C1;
-        S = 110.4;
-        C1 = 1.458e-6;
-        mu = C1 * pow(T, 1.5) / (T + S);
+
+        mu = (1.716e-5) * pow(T/273.15, 3.0/2.0) * ((273.15 + 110.4)/(T + 110.4));
 
         ASSERT(!_isnan(a), "Failed to calculate sound speed!")
     }
@@ -88,6 +86,27 @@ public:
         double hnew = Yv*(y[0]*air.Calc_h_Curve(0,Tnew) + y[1]*air.Calc_h_Curve(1,Tnew) + y[2]*air.Calc_h_Curve(2,Tnew))
                         + Yl*(air.Calc_h_Curve(2,Tnew) - air.HVAP);
         dhT = (hnew - (Yv*hv+Yl*hl)) / dT;
+
+        //Derivatives with respect to vapor species fractions
+        double dyvo2, dyvn2, yvo2new, yvn2new;
+        dyvo2 = unk[0]*1e-8;
+        dyvn2 = unk[1]*1e-8;
+        yvo2new = unk[0] + dyvo2;
+        yvn2new = unk[1] + dyvn2;
+
+        y[0] = yvo2new;
+        y[1] = unk[1];
+        y[2] = 1.0 - yvo2new - unk[1];
+        hnew = Yv*(y[0]*air.Calc_h_Curve(0,unk[5]) + y[1]*air.Calc_h_Curve(1,unk[5]) + y[2]*air.Calc_h_Curve(2,unk[5]))
+               + Yl*(air.Calc_h_Curve(2,unk[5]) - air.HVAP);
+        dhyvo2 = (hnew - (Yv*hv+Yl*hl)) / dyvo2;
+
+        y[0] = unk[0];
+        y[1] = yvn2new;
+        y[2] = 1.0 - yvn2new - unk[0];
+        hnew = Yv*(y[0]*air.Calc_h_Curve(0,unk[5]) + y[1]*air.Calc_h_Curve(1,unk[5]) + y[2]*air.Calc_h_Curve(2,unk[5]))
+               + Yl*(air.Calc_h_Curve(2,unk[5]) - air.HVAP);
+        dhyvo2 = (hnew - (Yv*hv+Yl*hl)) / dyvn2;
 
     }
 
@@ -116,6 +135,28 @@ public:
         rho_mixnew = 1.0 / ((Yv/rhovnew) + ((1.0-Yv)/rholnew));
         drhoP = (rho_mixnew - rho_mix) / dp;
 
+        //Derivatives with respect to vapor species fractions
+        double dyvo2, dyvn2, yvo2new, yvn2new;
+        dyvo2 = unk[0]*1e-8;
+        dyvn2 = unk[1]*1e-8;
+        yvo2new = unk[0] + dyvo2;
+        yvn2new = unk[1] + dyvn2;
+
+        y[0] = yvo2new;
+        y[1] = unk[1];
+        y[2] = 1.0 - yvo2new - unk[1];
+        rholnew = air.RHOLREF + (p - air.PREF)/(air.AREF*air.AREF);
+        rhovnew = p / (unk[5]*(y[0]*air.Rs[0] + y[1]*air.Rs[1] + y[2]*air.Rs[2]));
+        rho_mixnew = 1.0 / ((Yv/rhovnew) + ((1.0-Yv)/rholnew));
+        drhoyvo2 = (rho_mixnew - rho_mix) / dyvo2;
+
+        y[0] = unk[0];
+        y[1] = yvn2new;
+        y[2] = 1.0 - yvn2new - unk[0];
+        rholnew = air.RHOLREF + (p - air.PREF)/(air.AREF*air.AREF);
+        rhovnew = p / (unk[5]*(y[0]*air.Rs[0] + y[1]*air.Rs[1] + y[2]*air.Rs[2]));
+        rho_mixnew = 1.0 / ((Yv/rhovnew) + ((1.0-Yv)/rholnew));
+        drhoyvn2 = (rho_mixnew - rho_mix) / dyvn2;
 
     }
 

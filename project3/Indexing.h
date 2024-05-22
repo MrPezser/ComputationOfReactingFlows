@@ -18,7 +18,7 @@
 #define IJ(i,j,nj) ((i)*(nj) + (j))
 
 //#define MXITER 1
-#define MXITER (1e7)
+#define MXITER (1e6)
 #define RESTOL (1e-6) //residual drop to declare convergence
 #define RXTOL (1e-3) //residual drop to activate thermochemical source terms
 #define CFLTCNE 0.1 //Thermochem CFL factor, need lower timestep to accomodate nonequilibrium effects

@@ -162,7 +162,7 @@ double RelVelSource(int ielem, double A, const double dx, const double* unk, Sta
     //CD = (24.0/REdrop)*(1.0 + 0.15*pow(REdrop,0.634))*pow(alpha1,-2.65);
     //CD = fmin(CD,1e4);
 
-    REdrop =var.rhov * alpha1 * var.dp * fabs(unk[7]) / var.mu;
+    REdrop =var.rhov * alpha1 * fmax(1e-7, var.dp) * fabs(unk[7]) / var.mu;
     REdrop = fmax(REdrop, 1e-6);
     double corr = (1.0 + 0.15*pow(fmin(REdrop,1000.0),0.687))*pow(alpha1,-3.65);
     CD = (24.0/fmin(REdrop,1000.0))*corr;
@@ -183,7 +183,7 @@ double RelVelSource(int ielem, double A, const double dx, const double* unk, Sta
     Sout += -sigma*(var.rho_mix/rho_tilde)*unk[7]*unk[7]*dalpha1;
 
     //  Drag term to relax velocities to bulk vel
-    Sout += -0.75*CD*(var.rho_mix/rho_tilde)*fabs(unk[7])*unk[7] / var.dp;
+    Sout += -0.75*CD*(var.rho_mix/rho_tilde)*fabs(unk[7])*unk[7] / fmax(1e-7, var.dp);
 
     //  Source term to generate the differences based on the different phases being accelerated differently
     Sout += -((var.rhol - var.rhov)/(var.rhov*var.rhol)) * dpress;
@@ -267,9 +267,20 @@ void CalcRes(int isource, int nelem, double dx, double CFL, double pb, Chem &air
         res[id + 4] += ui[3] * (Afa[ielem + 1] - Afa[ielem]) / dx; // dAdx[ielem];
 
         //vapor source term
-        res[id + 2] += VaporSource(Acc[ielem], ui, ElemVar[ielem], air);
+        double vapsrc{0.0};
+        vapsrc = VaporSource(Acc[ielem], ui, ElemVar[ielem], air);
+        res[id + 2] += vapsrc;
+
+        ///Instead of this try modifying to maintain a certain dp
+        //Number Density source term
+        //double P = 1.0; //Probability of droplet being at risk of being consumed
+        //double numsrc = -(P * ui[6] * vapsrc / var.rhol) * (1e-1 / fmax(var.dp,1e-10));
+        //printf("numsrc:%e\n",numsrc);
+        //res[id + 6] += Acc[ielem] * numsrc * var.rho_mix;
+
+
         if (isource == 1) {
-            res[id + 7] += RelVelSource(ielem, Acc[ielem], dx, ui, var, relvel_flux_extras, air);
+            //res[id + 7] += RelVelSource(ielem, Acc[ielem], dx, ui, var, relvel_flux_extras, air);
         }
 
         for (int kvar = 0; kvar < (NVAR); kvar++) {

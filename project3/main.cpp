@@ -43,7 +43,7 @@ int main() {
     double pb_ratio, pb;
 
     nelem = 300;
-    CFL = 0.003;//0.4;
+    CFL = 0.3;//0.4;
     pb_ratio = 10.0;
     isource = 1;
 
@@ -144,7 +144,7 @@ int main() {
             }
         }
     }
-    restart(nelem,u);
+    //restart(nelem,u);
 
     int success = solve(isource, nelem, dx, CFL, pb, air, u0, u, xcc, Acc, Afa, dAdx);
 

@@ -188,7 +188,7 @@ int solve(int& isource, int nelem, double dx, double CFL, double pb, Chem &air, 
 
             //Check bounds
             ASSERT((fabs(ui[0]+ui[1]) <= 1.0) , "Vapor species massfrac failed conservation")
-            ASSERT(ui[2] <= 1.5 and ui[2] >= 0.0, "Phase massfrac failed conservation")
+            ASSERT(ui[2] < 1.1 and ui[2] >= 0.0, "Phase massfrac failed conservation")
             ASSERT((ui[6] > 0.0), "Negative droplet number density?")
 
         }

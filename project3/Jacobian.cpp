@@ -21,12 +21,28 @@ void BuildJacobian(int isource, double dt, const double* unk, Chem &air, State& 
     double Yv = unk[2];
 
     //      d__/d(yv1)
-    D[0][0] =  dti * var.rho_mix*Yv;
-    /// ADD d_rho/d_yv1 TERMS
+    D[0][0] = dti * (0.0*var.drhoyvo2*unk[0]*Yv + var.rho_mix*Yv);
+    /*
+    D[1][0] = dti * (var.drhoyvo2*unk[1]*Yv);
+    D[2][0] = dti * (var.drhoyvo2*Yv);
+    D[3][0] = dti * (var.drhoyvo2);
+    D[4][0] = dti * (var.drhoyvo2*unk[4]);
+    D[5][0] = dti * (var.drhoyvo2*var.h0 + var.rho_mix*var.dhyvo2);
+    D[6][0] = dti * (var.drhoyvo2*unk[6]);
+    D[7][0] = dti * (var.drhoyvo2*unk[7]);
+     */
 
     // d__/d(yv2)
-    D[1][1] =  dti * var.rho_mix*Yv;
-    /// ADD d_rho/d_yv2 TERMS
+    //D[0][1] = dti * (var.drhoyvn2*unk[0]*Yv);
+    D[1][1] = dti * (0.0*var.drhoyvn2*unk[1]*Yv + var.rho_mix*Yv);
+    /*
+    D[2][1] = dti * (var.drhoyvn2*Yv);
+    D[3][1] = dti * (var.drhoyvn2);
+    D[4][1] = dti * (var.drhoyvn2*unk[4]);
+    D[5][1] = dti * (var.drhoyvn2*var.h0 + var.rho_mix*var.dhyvn2);
+    D[6][1] = dti * (var.drhoyvn2*unk[6]);
+    D[7][1] = dti * (var.drhoyvn2*unk[7]);
+     */
 
     //      d__/d(Yv)
     double drhodYv = -var.rho_mix*var.rho_mix * (1.0/var.rhov - 1.0/var.rhol);

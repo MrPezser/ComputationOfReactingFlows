@@ -6,3 +6,4 @@ project3/CoupledSolutionRes.lpk
 project3/CoupledSolutionRes.lpk
 project3/cmake-build-debug/res.tec
 *.tec
+*.lpk
