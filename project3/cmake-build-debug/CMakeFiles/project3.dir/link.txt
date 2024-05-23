@@ -1,3 +1,1 @@
-"C:\Program Files\JetBrains\CLion 2023.1.3\bin\cmake\win\x64\bin\cmake.exe" -E rm -f CMakeFiles\project3.dir/objects.a
-C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\ar.exe qc CMakeFiles\project3.dir/objects.a @CMakeFiles\project3.dir\objects1
-C:\PROGRA~1\JETBRA~1\CLION2~1.3\bin\mingw\bin\G__~1.EXE -g -Wl,--whole-archive CMakeFiles\project3.dir/objects.a -Wl,--no-whole-archive -o project3.exe -Wl,--out-implib,libproject3.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\project3.dir\linkLibs.rsp
+/usr/bin/c++ -g CMakeFiles/project3.dir/main.cpp.o CMakeFiles/project3.dir/Chemistry.cpp.o CMakeFiles/project3.dir/LinearSolve.cpp.o CMakeFiles/project3.dir/Solver_main.cpp.o CMakeFiles/project3.dir/RHS.cpp.o CMakeFiles/project3.dir/Jacobian.cpp.o -o project3 
