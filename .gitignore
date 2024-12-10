@@ -7,3 +7,6 @@ project3/CoupledSolutionRes.lpk
 project3/cmake-build-debug/res.tec
 *.tec
 *.lpk
+project3/CoupledSolutionRes.lpk
+project3/plotwaveout.lpk
+project3/cmake-build-debug/res.tec
