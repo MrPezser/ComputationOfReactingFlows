@@ -1,0 +1,1 @@
+A couple projects from a reactinf flows class I took. The scenarios is a quasi-1D inviscid nozzle-shock problem with air dissociation. Project 3 introduces thermal nonequilibrium (vibrational mode) effects.
